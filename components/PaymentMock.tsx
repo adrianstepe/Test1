@@ -1,0 +1,186 @@
+import React, { useState } from 'react';
+import { Language, Service, BookingState } from '../types';
+import { TEXTS } from '../constants';
+
+// Declare Stripe on window object to avoid TS errors without installing types
+declare global {
+  interface Window {
+    Stripe?: (key: string) => any;
+  }
+}
+
+interface PaymentMockProps {
+  language: Language;
+  service: Service;
+  booking: BookingState;
+  onConfirm: () => void; // Kept for prop compatibility
+}
+
+const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking }) => {
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+  const depositAmount = 30; // Fixed deposit
+
+  const handlePay = async () => {
+    setLoading(true);
+    setErrorMsg(null);
+    setPaymentUrl(null);
+
+    try {
+      const amountInCents = depositAmount * 100;
+
+      // Determine a safe Base URL
+      const getBaseUrl = () => {
+        if (typeof window !== 'undefined' && window.location.href.startsWith('http')) {
+          return window.location.href.split('?')[0];
+        }
+        return 'https://book.butkevicadental.com';
+      };
+
+      const baseUrl = getBaseUrl();
+
+      // 1. Call Backend to create Checkout Session
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://stripe-mvp-proxy.adriansbusinessw.workers.dev/';
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        mode: 'cors',
+        body: JSON.stringify({
+          amount: amountInCents,
+          service: service.name[Language.EN],
+          success_url: `${baseUrl}?success=1`,
+          cancel_url: `${baseUrl}?cancel=1`,
+          // Pass full booking details
+          customer: {
+            name: `${booking.patientData.firstName} ${booking.patientData.lastName}`,
+            email: booking.patientData.email,
+            phone: booking.patientData.phone
+          },
+          booking: {
+            date: booking.selectedDate,
+            time: booking.selectedTime,
+            serviceId: service.id
+          }
+        })
+      });
+
+      if (!response.ok) {
+        let errText = response.statusText;
+        try {
+          const errJson = await response.json();
+          errText = errJson.error || response.statusText;
+        } catch (e) {
+          errText = await response.text();
+        }
+        throw new Error(`Server Error: ${errText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      if (!data.url) {
+        throw new Error("Invalid response from payment server (no checkout URL).");
+      }
+
+      // 2. Direct Redirect
+      // We try to set window.location.href. 
+      // If this is blocked (e.g. by sandbox permissions), we catch the error 
+      // and show a manual button instead.
+      try {
+        window.location.href = data.url;
+      } catch (navigationError: any) {
+        console.warn("Auto-redirect blocked. Falling back to manual link.", navigationError);
+        setPaymentUrl(data.url);
+        setLoading(false); // Stop loading to show the link
+      }
+
+    } catch (err: any) {
+      console.error("Payment initiation failed:", err);
+      if (err.message === 'Failed to fetch') {
+        setErrorMsg("Network Error: Could not connect to the payment server. Please ensure the Cloudflare Worker URL is correct and deployed.");
+      } else {
+        setErrorMsg(err.message || "An unexpected error occurred. Please try again.");
+      }
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="animate-fade-in max-w-md mx-auto">
+      <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-6">
+        <h3 className="font-bold text-gray-900 mb-4">{TEXTS.total[language]}</h3>
+        <div className="flex justify-between text-sm mb-2 text-gray-600">
+          <span>{service.name[language]}</span>
+          <span>€{service.price}</span>
+        </div>
+        <div className="flex justify-between text-sm mb-4 text-gray-600">
+          <span>Reservation Fee (Deposit)</span>
+          <span>€{depositAmount}</span>
+        </div>
+        <div className="border-t border-gray-200 pt-4 flex justify-between font-bold text-lg text-secondary">
+          <span>{TEXTS.deposit[language]}</span>
+          <span>€{depositAmount}</span>
+        </div>
+      </div>
+
+      <div className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm text-center">
+        <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+          🔒
+        </div>
+
+        <h4 className="text-lg font-bold text-gray-900 mb-2">Secure Checkout</h4>
+        <p className="text-sm text-gray-500 mb-6">
+          You will be redirected to Stripe to securely complete your payment of €{depositAmount}.
+        </p>
+
+        {errorMsg && (
+          <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
+            {errorMsg}
+          </div>
+        )}
+
+        {paymentUrl ? (
+          <a
+            href={paymentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full py-4 rounded-xl font-bold text-white shadow-lg bg-primary hover:bg-teal-700 flex items-center justify-center gap-2 no-underline"
+          >
+            <span>Continue to Payment &rarr;</span>
+          </a>
+        ) : (
+          <button
+            onClick={handlePay}
+            disabled={loading}
+            className={`w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 ${loading ? 'bg-gray-400 cursor-wait' : 'bg-primary hover:bg-teal-700'
+              }`}
+          >
+            {loading ? (
+              <span>Preparing Checkout...</span>
+            ) : (
+              <>
+                <span>{TEXTS.paySecure[language]} €{depositAmount}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </>
+            )}
+          </button>
+        )}
+
+        <div className="mt-4 flex items-center justify-center gap-2 text-gray-400 grayscale opacity-60">
+          <span className="text-xs font-semibold">Powered by</span>
+          <span className="font-bold italic text-lg">Stripe</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PaymentMock;

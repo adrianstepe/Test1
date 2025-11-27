@@ -1,0 +1,52 @@
+export enum Language {
+  EN = 'EN',
+  LV = 'LV',
+  RU = 'RU'
+}
+
+export interface Service {
+  id: string;
+  name: Record<Language, string>;
+  description: Record<Language, string>;
+  price: number;
+  durationMinutes: number;
+  icon: string;
+}
+
+export interface Specialist {
+  id: string;
+  name: string;
+  role: Record<Language, string>;
+  photoUrl: string;
+  specialties: string[];
+}
+
+export interface TimeSlot {
+  time: string;
+  available: boolean;
+}
+
+export interface BookingState {
+  step: number;
+  language: Language;
+  selectedService: Service | null;
+  selectedSpecialist: Specialist | null;
+  selectedDate: Date | null;
+  selectedTime: string | null;
+  patientData: PatientData;
+}
+
+export interface PatientData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  details: string;
+  gdprConsent: boolean;
+  marketingConsent: boolean;
+  medicalPhoto: File | null;
+}
+
+export interface Translations {
+  [key: string]: Record<Language, string>;
+}

@@ -1,0 +1,187 @@
+import React, { useState, useEffect } from 'react';
+import Header from './components/Header';
+import ProgressBar from './components/ProgressBar';
+import ServiceSelection from './components/ServiceSelection';
+import SpecialistSelection from './components/SpecialistSelection';
+import PatientForm from './components/PatientForm';
+import PaymentMock from './components/PaymentMock';
+import Confirmation from './components/Confirmation';
+import { Language, BookingState, Service } from './types';
+import { TEXTS } from './constants';
+
+const App: React.FC = () => {
+  const [booking, setBooking] = useState<BookingState>({
+    step: 1,
+    language: Language.LV,
+    selectedService: null,
+    selectedSpecialist: null,
+    selectedDate: null,
+    selectedTime: null,
+    patientData: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      details: '',
+      gdprConsent: false,
+      marketingConsent: false,
+      medicalPhoto: null
+    }
+  });
+
+  // Handle browser back button within the widget context (optional enhancement)
+  useEffect(() => {
+    // Scroll to top on step change
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [booking.step]);
+
+  // Persist state to localStorage to handle redirect flows (like Stripe)
+  useEffect(() => {
+    localStorage.setItem('butkevicaBookingState', JSON.stringify(booking));
+  }, [booking]);
+
+  // Check for success return from Payment provider
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('success') === '1') {
+      const savedState = localStorage.getItem('butkevicaBookingState');
+      if (savedState) {
+        try {
+          const parsed = JSON.parse(savedState);
+          // Restore Date object from string
+          if (parsed.selectedDate) {
+            parsed.selectedDate = new Date(parsed.selectedDate);
+          }
+          // Set state and jump to confirmation
+          setBooking({ ...parsed, step: 5 });
+        } catch (e) {
+          console.error("Failed to restore booking state", e);
+        }
+      }
+    }
+  }, []);
+
+  const updateBooking = (updates: Partial<BookingState>) => {
+    setBooking(prev => ({ ...prev, ...updates }));
+  };
+
+  const updatePatientData = (data: Partial<typeof booking.patientData>) => {
+    setBooking(prev => ({ ...prev, patientData: { ...prev.patientData, ...data } }));
+  };
+
+  const nextStep = () => {
+    if (booking.step < 5) {
+      updateBooking({ step: booking.step + 1 });
+    }
+  };
+
+  const prevStep = () => {
+    if (booking.step > 1) {
+      updateBooking({ step: booking.step - 1 });
+    }
+  };
+
+  const isStepValid = () => {
+    switch (booking.step) {
+      case 1: return !!booking.selectedService;
+      case 2: return !!booking.selectedDate && !!booking.selectedTime;
+      case 3:
+        const { firstName, lastName, email, phone, gdprConsent } = booking.patientData;
+        return firstName && lastName && email && phone && gdprConsent;
+      case 4: return true; // Payment handled in component
+      default: return false;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <Header
+        currentLanguage={booking.language}
+        setLanguage={(lang) => updateBooking({ language: lang })}
+      />
+
+      <main className="max-w-3xl mx-auto bg-white min-h-[calc(100vh-64px)] shadow-xl sm:my-8 sm:rounded-2xl sm:min-h-fit overflow-hidden">
+        {booking.step < 5 && (
+          <ProgressBar currentStep={booking.step} language={booking.language} />
+        )}
+
+        <div className="p-6 sm:p-8">
+          {booking.step === 1 && (
+            <ServiceSelection
+              language={booking.language}
+              selectedService={booking.selectedService}
+              onSelect={(service) => {
+                updateBooking({ selectedService: service });
+                // Auto advance on mobile for better UX
+                setTimeout(() => nextStep(), 200);
+              }}
+            />
+          )}
+
+          {booking.step === 2 && booking.selectedService && (
+            <SpecialistSelection
+              language={booking.language}
+              selectedService={booking.selectedService}
+              selectedSpecialist={booking.selectedSpecialist}
+              selectedDate={booking.selectedDate}
+              selectedTime={booking.selectedTime}
+              onSelectSpecialist={(s) => updateBooking({ selectedSpecialist: s })}
+              onSelectDate={(d) => updateBooking({ selectedDate: d, selectedTime: null })}
+              onSelectTime={(t) => updateBooking({ selectedTime: t })}
+            />
+          )}
+
+          {booking.step === 3 && (
+            <PatientForm
+              language={booking.language}
+              data={booking.patientData}
+              updateData={updatePatientData}
+            />
+          )}
+
+          {booking.step === 4 && booking.selectedService && (
+            <PaymentMock
+              language={booking.language}
+              service={booking.selectedService}
+              booking={booking}
+              onConfirm={nextStep}
+            />
+          )}
+
+          {booking.step === 5 && (
+            <Confirmation language={booking.language} booking={booking} />
+          )}
+        </div>
+
+        {/* Footer Navigation (Sticky on Mobile) */}
+        {booking.step < 5 && booking.step !== 4 && (
+          <div className="sticky bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center sm:relative sm:border-0 sm:bg-transparent">
+            <button
+              onClick={prevStep}
+              disabled={booking.step === 1}
+              className={`px-6 py-3 rounded-xl font-medium transition-colors ${booking.step === 1
+                  ? 'text-gray-300 cursor-not-allowed'
+                  : 'text-gray-600 hover:bg-gray-100'
+                }`}
+            >
+              {TEXTS.back[booking.language]}
+            </button>
+
+            <button
+              onClick={nextStep}
+              disabled={!isStepValid()}
+              className={`px-8 py-3 rounded-xl font-bold text-white shadow-md transition-all transform active:scale-95 ${isStepValid()
+                  ? 'bg-primary hover:bg-teal-700'
+                  : 'bg-gray-300 cursor-not-allowed shadow-none'
+                }`}
+            >
+              {TEXTS.next[booking.language]}
+            </button>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+};
+
+export default App;
