@@ -117,6 +117,32 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
 
   return (
     <div className="animate-fade-in max-w-md mx-auto">
+      {/* Reservation Fee Policy Information */}
+      <div className="bg-teal-50 dark:bg-teal-900/20 p-6 rounded-xl border-2 border-teal-200 dark:border-teal-800 mb-6">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="text-2xl">ℹ️</div>
+          <div className="flex-1">
+            <h3 className="font-bold text-teal-900 dark:text-teal-100 mb-3 text-lg">
+              {TEXTS.reservationFeeTitle[language]} 30 €
+            </h3>
+            <ul className="space-y-2 text-sm text-teal-800 dark:text-teal-200">
+              <li className="flex gap-2">
+                <span className="text-teal-600 dark:text-teal-400 font-bold">•</span>
+                <span>{TEXTS.reservationFeeDesc1[language]}</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-teal-600 dark:text-teal-400 font-bold">✓</span>
+                <span>{TEXTS.reservationFeeDesc2[language]}</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-teal-600 dark:text-teal-400 font-bold">✗</span>
+                <span>{TEXTS.reservationFeeDesc3[language]}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-gray-50 dark:bg-slate-800 p-6 rounded-xl border border-gray-200 dark:border-slate-700 mb-6">
         <h3 className="font-bold text-gray-900 dark:text-white mb-4">{TEXTS.total[language]}</h3>
         <div className="flex justify-between text-sm mb-2 text-gray-600 dark:text-gray-400">
