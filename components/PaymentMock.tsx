@@ -42,9 +42,6 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
       const successUrl = `${baseUrl}?success=1`;
       const cancelUrl = `${baseUrl}?cancel=1`;
 
-      // Debug: Alert the Success URL to verify it's not "bedpage"
-      alert(`Debug: Success URL will be: ${successUrl}`);
-
       // 1. Call Backend to create Checkout Session
       const apiUrl = import.meta.env.VITE_API_URL || 'https://stripe-mvp-proxy.adriansbusinessw.workers.dev/';
       const response = await fetch(apiUrl, {
@@ -94,7 +91,6 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
       }
 
       console.log("Payment URL received:", data.url); // Debug log
-      alert("Debug: Redirecting to " + data.url); // Force user to see URL
 
       // 2. Direct Redirect
       // We try to set window.location.href. 
