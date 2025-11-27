@@ -89,6 +89,7 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
       }
 
       console.log("Payment URL received:", data.url); // Debug log
+      alert("Debug: Redirecting to " + data.url); // Force user to see URL
 
       // 2. Direct Redirect
       // We try to set window.location.href. 
