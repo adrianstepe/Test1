@@ -32,13 +32,18 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
 
       // Determine a safe Base URL
       const getBaseUrl = () => {
-        if (typeof window !== 'undefined' && window.location.href.startsWith('http')) {
-          return window.location.href.split('?')[0];
+        if (typeof window !== 'undefined') {
+          return window.location.origin + window.location.pathname;
         }
-        return 'https://book.butkevicadental.com';
+        return ''; // No fallback to external domains
       };
 
       const baseUrl = getBaseUrl();
+      const successUrl = `${baseUrl}?success=1`;
+      const cancelUrl = `${baseUrl}?cancel=1`;
+
+      // Debug: Alert the Success URL to verify it's not "bedpage"
+      alert(`Debug: Success URL will be: ${successUrl}`);
 
       // 1. Call Backend to create Checkout Session
       const apiUrl = import.meta.env.VITE_API_URL || 'https://stripe-mvp-proxy.adriansbusinessw.workers.dev/';
@@ -51,8 +56,8 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
         body: JSON.stringify({
           amount: amountInCents,
           service: service.name[Language.EN],
-          success_url: `${baseUrl}?success=1`,
-          cancel_url: `${baseUrl}?cancel=1`,
+          success_url: successUrl,
+          cancel_url: cancelUrl,
           // Pass full booking details
           customer: {
             name: `${booking.patientData.firstName} ${booking.patientData.lastName}`,
