@@ -88,6 +88,8 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
         throw new Error("Invalid response from payment server (no checkout URL).");
       }
 
+      console.log("Payment URL received:", data.url); // Debug log
+
       // 2. Direct Redirect
       // We try to set window.location.href. 
       // If this is blocked (e.g. by sandbox permissions), we catch the error 
@@ -113,34 +115,34 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
 
   return (
     <div className="animate-fade-in max-w-md mx-auto">
-      <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-6">
-        <h3 className="font-bold text-gray-900 mb-4">{TEXTS.total[language]}</h3>
-        <div className="flex justify-between text-sm mb-2 text-gray-600">
+      <div className="bg-gray-50 dark:bg-slate-800 p-6 rounded-xl border border-gray-200 dark:border-slate-700 mb-6">
+        <h3 className="font-bold text-gray-900 dark:text-white mb-4">{TEXTS.total[language]}</h3>
+        <div className="flex justify-between text-sm mb-2 text-gray-600 dark:text-gray-400">
           <span>{service.name[language]}</span>
           <span>€{service.price}</span>
         </div>
-        <div className="flex justify-between text-sm mb-4 text-gray-600">
+        <div className="flex justify-between text-sm mb-4 text-gray-600 dark:text-gray-400">
           <span>Reservation Fee (Deposit)</span>
           <span>€{depositAmount}</span>
         </div>
-        <div className="border-t border-gray-200 pt-4 flex justify-between font-bold text-lg text-secondary">
+        <div className="border-t border-gray-200 dark:border-slate-700 pt-4 flex justify-between font-bold text-lg text-secondary dark:text-teal-400">
           <span>{TEXTS.deposit[language]}</span>
           <span>€{depositAmount}</span>
         </div>
       </div>
 
-      <div className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm text-center">
-        <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+      <div className="border border-gray-200 dark:border-slate-700 rounded-xl p-6 bg-white dark:bg-slate-800 shadow-sm text-center">
+        <div className="w-16 h-16 bg-teal-50 dark:bg-teal-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
           🔒
         </div>
 
-        <h4 className="text-lg font-bold text-gray-900 mb-2">Secure Checkout</h4>
-        <p className="text-sm text-gray-500 mb-6">
+        <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Secure Checkout</h4>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
           You will be redirected to Stripe to securely complete your payment of €{depositAmount}.
         </p>
 
         {errorMsg && (
-          <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
+          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg border border-red-100 dark:border-red-800">
             {errorMsg}
           </div>
         )}
@@ -174,7 +176,7 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
           </button>
         )}
 
-        <div className="mt-4 flex items-center justify-center gap-2 text-gray-400 grayscale opacity-60">
+        <div className="mt-4 flex items-center justify-center gap-2 text-gray-400 dark:text-gray-500 grayscale opacity-60">
           <span className="text-xs font-semibold">Powered by</span>
           <span className="font-bold italic text-lg">Stripe</span>
         </div>

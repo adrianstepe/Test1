@@ -25,7 +25,7 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
 }) => {
   // Mock logic: Filter specialists who can perform the selected service
   const availableSpecialists = SPECIALISTS.filter(s => s.specialties.includes(selectedService.id));
-  
+
   // Generate next 7 days
   const [dates, setDates] = useState<Date[]>([]);
   const [slots, setSlots] = useState<TimeSlot[]>([]);
@@ -66,36 +66,34 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
     <div className="space-y-8 animate-fade-in">
       {/* Specialist Selection */}
       <div>
-        <h2 className="text-xl font-bold text-secondary mb-4">{TEXTS.selectSpecialist[language]}</h2>
+        <h2 className="text-xl font-bold text-secondary dark:text-white mb-4">{TEXTS.selectSpecialist[language]}</h2>
         <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
-           {/* Option for "Any Specialist" */}
-           <button
+          {/* Option for "Any Specialist" */}
+          <button
             onClick={() => onSelectSpecialist(null)}
-            className={`min-w-[140px] p-4 rounded-xl border-2 flex flex-col items-center justify-center transition-all snap-start ${
-              selectedSpecialist === null
-                ? 'border-primary bg-teal-50'
-                : 'border-gray-200 bg-white'
-            }`}
+            className={`min-w-[140px] p-4 rounded-xl border-2 flex flex-col items-center justify-center transition-all snap-start ${selectedSpecialist === null
+                ? 'border-primary bg-teal-50 dark:bg-teal-900/20'
+                : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
+              }`}
           >
-            <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-2xl mb-2">
+            <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center text-2xl mb-2">
               🏥
             </div>
-            <span className="text-sm font-medium text-center">{TEXTS.anySpecialist[language]}</span>
+            <span className="text-sm font-medium text-center text-gray-900 dark:text-gray-100">{TEXTS.anySpecialist[language]}</span>
           </button>
 
           {availableSpecialists.map((spec) => (
             <button
               key={spec.id}
               onClick={() => onSelectSpecialist(spec)}
-              className={`min-w-[140px] p-4 rounded-xl border-2 flex flex-col items-center transition-all snap-start ${
-                selectedSpecialist?.id === spec.id
-                  ? 'border-primary bg-teal-50'
-                  : 'border-gray-200 bg-white'
-              }`}
+              className={`min-w-[140px] p-4 rounded-xl border-2 flex flex-col items-center transition-all snap-start ${selectedSpecialist?.id === spec.id
+                  ? 'border-primary bg-teal-50 dark:bg-teal-900/20'
+                  : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
+                }`}
             >
-              <img src={spec.photoUrl} alt={spec.name} className="w-16 h-16 rounded-full object-cover mb-2 border border-gray-100" />
-              <span className="text-sm font-bold text-gray-800 text-center">{spec.name}</span>
-              <span className="text-xs text-gray-500 text-center">{spec.role[language]}</span>
+              <img src={spec.photoUrl} alt={spec.name} className="w-16 h-16 rounded-full object-cover mb-2 border border-gray-100 dark:border-slate-600" />
+              <span className="text-sm font-bold text-gray-800 dark:text-gray-100 text-center">{spec.name}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 text-center">{spec.role[language]}</span>
             </button>
           ))}
         </div>
@@ -103,7 +101,7 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
 
       {/* Date Selection */}
       <div>
-        <h2 className="text-xl font-bold text-secondary mb-4">{TEXTS.stepDate[language]}</h2>
+        <h2 className="text-xl font-bold text-secondary dark:text-white mb-4">{TEXTS.stepDate[language]}</h2>
         <div className="flex gap-3 overflow-x-auto pb-2">
           {dates.map((date) => {
             const { dayName, dayNum } = formatDate(date);
@@ -112,11 +110,10 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
               <button
                 key={date.toISOString()}
                 onClick={() => onSelectDate(date)}
-                className={`min-w-[70px] p-3 rounded-xl border transition-all flex flex-col items-center ${
-                  isSelected
+                className={`min-w-[70px] p-3 rounded-xl border transition-all flex flex-col items-center ${isSelected
                     ? 'bg-secondary text-white border-secondary shadow-lg transform scale-105'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-primary'
-                }`}
+                    : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:border-primary dark:hover:border-primary'
+                  }`}
               >
                 <span className="text-xs uppercase font-medium mb-1 opacity-80">{dayName}</span>
                 <span className="text-xl font-bold">{dayNum}</span>
@@ -134,20 +131,19 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
               key={slot.time}
               disabled={!slot.available}
               onClick={() => onSelectTime(slot.time)}
-              className={`py-3 px-2 rounded-lg text-sm font-medium border transition-all ${
-                !slot.available
-                  ? 'bg-gray-50 text-gray-300 border-transparent cursor-not-allowed decoration-slice'
+              className={`py-3 px-2 rounded-lg text-sm font-medium border transition-all ${!slot.available
+                  ? 'bg-gray-50 dark:bg-slate-800/50 text-gray-300 dark:text-slate-600 border-transparent cursor-not-allowed decoration-slice'
                   : selectedTime === slot.time
-                  ? 'bg-primary text-white border-primary shadow-md'
-                  : 'bg-white text-gray-700 border-gray-200 hover:border-primary hover:text-primary'
-              }`}
+                    ? 'bg-primary text-white border-primary shadow-md'
+                    : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-slate-700 hover:border-primary hover:text-primary'
+                }`}
             >
               {slot.time}
             </button>
           ))}
         </div>
         {selectedDate && slots.every(s => !s.available) && (
-          <p className="text-center text-gray-500 mt-4 text-sm">No slots available for this date.</p>
+          <p className="text-center text-gray-500 dark:text-gray-400 mt-4 text-sm">No slots available for this date.</p>
         )}
       </div>
     </div>

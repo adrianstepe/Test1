@@ -93,14 +93,36 @@ const App: React.FC = () => {
     }
   };
 
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    // Initialize state from DOM or localStorage
+    if (document.documentElement.classList.contains('dark')) {
+      setTheme('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.theme = newTheme;
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-20 transition-colors duration-300">
       <Header
         currentLanguage={booking.language}
         setLanguage={(lang) => updateBooking({ language: lang })}
+        theme={theme}
+        toggleTheme={toggleTheme}
       />
 
-      <main className="max-w-3xl mx-auto bg-white min-h-[calc(100vh-64px)] shadow-xl sm:my-8 sm:rounded-2xl sm:min-h-fit overflow-hidden">
+      <main className="max-w-3xl mx-auto bg-white dark:bg-slate-800 min-h-[calc(100vh-64px)] shadow-xl sm:my-8 sm:rounded-2xl sm:min-h-fit overflow-hidden transition-colors duration-300">
         {booking.step < 5 && (
           <ProgressBar currentStep={booking.step} language={booking.language} />
         )}
@@ -155,13 +177,13 @@ const App: React.FC = () => {
 
         {/* Footer Navigation (Sticky on Mobile) */}
         {booking.step < 5 && booking.step !== 4 && (
-          <div className="sticky bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center sm:relative sm:border-0 sm:bg-transparent">
+          <div className="sticky bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t dark:border-slate-700 p-4 flex justify-between items-center sm:relative sm:border-0 sm:bg-transparent dark:sm:bg-transparent transition-colors duration-300">
             <button
               onClick={prevStep}
               disabled={booking.step === 1}
               className={`px-6 py-3 rounded-xl font-medium transition-colors ${booking.step === 1
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : 'text-gray-600 hover:bg-gray-100'
+                ? 'text-gray-300 cursor-not-allowed'
+                : 'text-gray-600 hover:bg-gray-100'
                 }`}
             >
               {TEXTS.back[booking.language]}
@@ -171,8 +193,8 @@ const App: React.FC = () => {
               onClick={nextStep}
               disabled={!isStepValid()}
               className={`px-8 py-3 rounded-xl font-bold text-white shadow-md transition-all transform active:scale-95 ${isStepValid()
-                  ? 'bg-primary hover:bg-teal-700'
-                  : 'bg-gray-300 cursor-not-allowed shadow-none'
+                ? 'bg-primary hover:bg-teal-700'
+                : 'bg-gray-300 cursor-not-allowed shadow-none'
                 }`}
             >
               {TEXTS.next[booking.language]}
