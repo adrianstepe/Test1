@@ -1,0 +1,208 @@
+{
+    "name": "1. Booking Intent (No DB)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "booking-intent",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                240,
+                300
+            ],
+            "id": "webhook-booking",
+            "name": "Webhook (From Widget)",
+            "webhookId": "booking-intent-webhook"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "customer_name",
+                            "name": "customer_name",
+                            "value": "={{$json.body.customer.name}}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "customer_email",
+                            "name": "customer_email",
+                            "value": "={{$json.body.customer.email}}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "booking_date",
+                            "name": "booking_date",
+                            "value": "={{$json.body.booking.date}}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "booking_time",
+                            "name": "booking_time",
+                            "value": "={{$json.body.booking.time}}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "service_id",
+                            "name": "service_id",
+                            "value": "={{$json.body.booking.serviceId}}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "amount_cents",
+                            "name": "amount_cents",
+                            "value": "={{$json.body.amount}}",
+                            "type": "number"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Extract Widget Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                460,
+                300
+            ],
+            "id": "extract-widget-data"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.stripe.com/v1/checkout/sessions",
+                "authentication": "predefinedCredentialType",
+                "nodeCredentialType": "stripeApi",
+                "sendBody": true,
+                "contentType": "form-urlencoded",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "payment_method_types[]",
+                            "value": "card"
+                        },
+                        {
+                            "name": "line_items[0][price_data][currency]",
+                            "value": "eur"
+                        },
+                        {
+                            "name": "line_items[0][price_data][product_data][name]",
+                            "value": "Dental Service"
+                        },
+                        {
+                            "name": "line_items[0][price_data][unit_amount]",
+                            "value": "={{$json.amount_cents}}"
+                        },
+                        {
+                            "name": "line_items[0][quantity]",
+                            "value": "1"
+                        },
+                        {
+                            "name": "mode",
+                            "value": "payment"
+                        },
+                        {
+                            "name": "success_url",
+                            "value": "={{$json.body.success_url}}"
+                        },
+                        {
+                            "name": "cancel_url",
+                            "value": "={{$json.body.cancel_url}}"
+                        },
+                        {
+                            "name": "metadata[customer_name]",
+                            "value": "={{$json.customer_name}}"
+                        },
+                        {
+                            "name": "metadata[customer_email]",
+                            "value": "={{$json.customer_email}}"
+                        },
+                        {
+                            "name": "metadata[booking_date]",
+                            "value": "={{$json.booking_date}}"
+                        },
+                        {
+                            "name": "metadata[booking_time]",
+                            "value": "={{$json.booking_time}}"
+                        },
+                        {
+                            "name": "metadata[service_id]",
+                            "value": "={{$json.service_id}}"
+                        },
+                        {
+                            "name": "customer_email",
+                            "value": "={{$json.customer_email}}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Create Stripe Checkout",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                680,
+                300
+            ],
+            "id": "create-stripe-session",
+            "credentials": {
+                "stripeApi": {
+                    "id": "YOUR_STRIPE_CREDENTIAL",
+                    "name": "Stripe account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ { \"url\": $json.url, \"id\": $json.id } }}"
+            },
+            "name": "Return Checkout URL",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                900,
+                300
+            ],
+            "id": "respond-checkout-url"
+        }
+    ],
+    "connections": {
+        "Webhook (From Widget)": {
+            "main": [
+                [
+                    {
+                        "node": "Extract Widget Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract Widget Data": {
+            "main": [
+                [
+                    {
+                        "node": "Create Stripe Checkout",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create Stripe Checkout": {
+            "main": [
+                [
+                    {
+                        "node": "Return Checkout URL",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

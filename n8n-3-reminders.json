@@ -1,0 +1,60 @@
+{
+    "name": "3. Appointment Reminders",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "hours",
+                            "hoursInterval": 1
+                        }
+                    ]
+                }
+            },
+            "name": "Every Hour",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1.2,
+            "position": [
+                240,
+                300
+            ],
+            "id": "cron-hourly"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "note",
+                            "name": "note",
+                            "value": "This workflow is ready but needs Supabase database connection. Once you add database, this will:\n1. Query for appointments 24h from now\n2. Loop through each appointment\n3. Send reminder email to each customer",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "name": "Placeholder (Add DB Later)",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                460,
+                300
+            ],
+            "id": "placeholder-note"
+        }
+    ],
+    "connections": {
+        "Every Hour": {
+            "main": [
+                [
+                    {
+                        "node": "Placeholder (Add DB Later)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

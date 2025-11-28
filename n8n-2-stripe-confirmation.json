@@ -1,0 +1,145 @@
+{
+    "name": "2. Stripe Confirmation",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "stripe-webhook",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                240,
+                300
+            ],
+            "id": "webhook-stripe",
+            "name": "Webhook (From Stripe)",
+            "webhookId": "stripe-webhook-id"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{$json.body.type}}",
+                            "value2": "checkout.session.completed"
+                        }
+                    ]
+                }
+            },
+            "name": "Only Process Completed",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                460,
+                300
+            ],
+            "id": "filter-completed"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "customer_name",
+                            "name": "customer_name",
+                            "value": "={{$json.body.data.object.metadata.customer_name}}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "customer_email",
+                            "name": "customer_email",
+                            "value": "={{$json.body.data.object.metadata.customer_email}}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "booking_date",
+                            "name": "booking_date",
+                            "value": "={{$json.body.data.object.metadata.booking_date}}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "booking_time",
+                            "name": "booking_time",
+                            "value": "={{$json.body.data.object.metadata.booking_time}}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "amount_paid",
+                            "name": "amount_paid",
+                            "value": "={{$json.body.data.object.amount_total / 100}}",
+                            "type": "number"
+                        }
+                    ]
+                }
+            },
+            "name": "Extract Payment Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                680,
+                300
+            ],
+            "id": "extract-payment-data"
+        },
+        {
+            "parameters": {
+                "resource": "message",
+                "subject": "✅ Appointment Confirmed - Butkeviča Dental",
+                "message": "=Hi {{$json.customer_name}},\n\nThank you for your payment of €{{$json.amount_paid}}!\n\n📅 Your dental appointment is confirmed:\nDate: {{$json.booking_date}}\nTime: {{$json.booking_time}}\n\nWe look forward to seeing you!\n\nIf you need to reschedule or have any questions, please contact us.\n\nBest regards,\nButkeviča Dental Practice",
+                "toEmail": "={{$json.customer_email}}",
+                "options": {}
+            },
+            "name": "Send Confirmation Email",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 1,
+            "position": [
+                900,
+                300
+            ],
+            "id": "send-gmail",
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "YOUR_GMAIL_CREDENTIAL",
+                    "name": "Gmail account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook (From Stripe)": {
+            "main": [
+                [
+                    {
+                        "node": "Only Process Completed",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Only Process Completed": {
+            "main": [
+                [
+                    {
+                        "node": "Extract Payment Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract Payment Data": {
+            "main": [
+                [
+                    {
+                        "node": "Send Confirmation Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
