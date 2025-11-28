@@ -1,55 +1,122 @@
 {
-    "name": "3. Appointment Reminders",
+    "name": "Reminders (Updated - Gmail)",
     "nodes": [
         {
             "parameters": {
-                "rule": {
-                    "interval": [
+                "triggerTimes": {
+                    "item": [
                         {
-                            "field": "hours",
-                            "hoursInterval": 1
+                            "mode": "everyHour"
                         }
                     ]
                 }
             },
-            "name": "Every Hour",
-            "type": "n8n-nodes-base.scheduleTrigger",
-            "typeVersion": 1.2,
+            "name": "Cron (Hourly)",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
             "position": [
-                240,
-                300
+                0,
+                0
             ],
-            "id": "cron-hourly"
+            "id": "0dda7ee8-8443-424b-9b16-46d6623342f5"
         },
         {
             "parameters": {
-                "assignments": {
-                    "assignments": [
-                        {
-                            "id": "note",
-                            "name": "note",
-                            "value": "This workflow is ready but needs Supabase database connection. Once you add database, this will:\n1. Query for appointments 24h from now\n2. Loop through each appointment\n3. Send reminder email to each customer",
-                            "type": "string"
-                        }
-                    ]
-                }
+                "operation": "executeQuery",
+                "query": "SELECT * FROM bookings \nWHERE status = 'booked' \nAND start_time BETWEEN NOW() + INTERVAL '24 hours' AND NOW() + INTERVAL '25 hours';",
+                "additionalFields": {}
             },
-            "name": "Placeholder (Add DB Later)",
-            "type": "n8n-nodes-base.set",
-            "typeVersion": 3.4,
+            "name": "Fetch Upcoming",
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 1,
             "position": [
-                460,
-                300
+                208,
+                0
             ],
-            "id": "placeholder-note"
+            "id": "ec3b465f-3631-41fa-8357-f274b80125cf",
+            "credentials": {
+                "postgres": {
+                    "id": "6DfCu5DXBg8c1OZ2",
+                    "name": "Postgres account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "batchSize": 1,
+                "options": {}
+            },
+            "name": "Split Batches",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "6c996032-2907-46df-a1fa-6ab6ec3f4f6f"
+        },
+        {
+            "parameters": {
+                "resource": "message",
+                "subject": "Reminder: Appointment Tomorrow",
+                "message": "=Hi {{$json.customer_name}},\n\nReminder for your appointment tomorrow at {{$json.start_time}}.\n\nSee you soon!",
+                "toEmail": "={{$json.customer_email}}"
+            },
+            "name": "Send Reminder Email (Gmail)",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 1,
+            "position": [
+                600,
+                0
+            ],
+            "id": "b5055426-05eb-4f2e-babd-9d633f95658a",
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "YOUR_GMAIL_CREDENTIAL_ID",
+                    "name": "Gmail account"
+                }
+            }
         }
     ],
     "connections": {
-        "Every Hour": {
+        "Cron (Hourly)": {
             "main": [
                 [
                     {
-                        "node": "Placeholder (Add DB Later)",
+                        "node": "Fetch Upcoming",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fetch Upcoming": {
+            "main": [
+                [
+                    {
+                        "node": "Split Batches",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Split Batches": {
+            "main": [
+                [
+                    {
+                        "node": "Send Reminder Email (Gmail)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Reminder Email (Gmail)": {
+            "main": [
+                [
+                    {
+                        "node": "Split Batches",
                         "type": "main",
                         "index": 0
                     }
