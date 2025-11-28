@@ -1,0 +1,200 @@
+{
+    "name": "Stripe Handler (Complete - No DB)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "webhook/stripe",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                250,
+                300
+            ],
+            "id": "webhook-stripe",
+            "name": "Webhook",
+            "webhookId": "45c1830b-9364-4b68-9c7d-e8ea2dade456"
+        },
+        {
+            "parameters": {
+                "dataType": "string",
+                "value1": "={{$json.body.type}}",
+                "rules": {
+                    "rules": [
+                        {
+                            "value2": "checkout.session.completed",
+                            "output": 0
+                        },
+                        {
+                            "value2": "checkout.session.expired",
+                            "output": 1
+                        }
+                    ]
+                }
+            },
+            "name": "Event Type Switch",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 1,
+            "position": [
+                450,
+                300
+            ],
+            "id": "event-switch"
+        },
+        {
+            "parameters": {
+                "mode": "returnFalse",
+                "values": {
+                    "string": [
+                        {
+                            "name": "customer_name",
+                            "value": "={{$json.body.data.object.metadata.customer_name}}"
+                        },
+                        {
+                            "name": "customer_email",
+                            "value": "={{$json.body.data.object.metadata.customer_email}}"
+                        },
+                        {
+                            "name": "booking_date",
+                            "value": "={{$json.body.data.object.metadata.booking_date}}"
+                        },
+                        {
+                            "name": "booking_time",
+                            "value": "={{$json.body.data.object.metadata.booking_time}}"
+                        },
+                        {
+                            "name": "service_id",
+                            "value": "={{$json.body.data.object.metadata.service_id}}"
+                        },
+                        {
+                            "name": "amount_paid",
+                            "value": "={{$json.body.data.object.amount_total / 100}}"
+                        },
+                        {
+                            "name": "payment_status",
+                            "value": "={{$json.body.data.object.payment_status}}"
+                        }
+                    ]
+                }
+            },
+            "name": "Extract Booking Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                650,
+                200
+            ],
+            "id": "extract-data"
+        },
+        {
+            "parameters": {
+                "resource": "message",
+                "subject": "✅ Appointment Confirmed - Butkeviča Dental",
+                "message": "=Hi {{$json.customer_name}},\n\nThank you for your payment of €{{$json.amount_paid}}!\n\nYour dental appointment is confirmed:\n📅 Date: {{$json.booking_date}}\n⏰ Time: {{$json.booking_time}}\n\nWe look forward to seeing you!\n\nIf you need to reschedule or have any questions, please contact us.\n\nBest regards,\nButkeviča Dental Practice\n\n---\nThis is an automated confirmation email.",
+                "toEmail": "={{$json.customer_email}}",
+                "options": {}
+            },
+            "name": "Send Confirmation Email",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 1,
+            "position": [
+                850,
+                200
+            ],
+            "id": "send-gmail",
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "YOUR_GMAIL_CREDENTIAL_ID",
+                    "name": "Gmail account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ { \"success\": true, \"message\": \"Payment confirmed, email sent\" } }}"
+            },
+            "name": "Respond Success",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                1050,
+                200
+            ],
+            "id": "respond-success"
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ { \"success\": false, \"message\": \"Session expired\" } }}"
+            },
+            "name": "Respond Expired",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                650,
+                400
+            ],
+            "id": "respond-expired"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Event Type Switch",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Event Type Switch": {
+            "main": [
+                [
+                    {
+                        "node": "Extract Booking Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Respond Expired",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract Booking Data": {
+            "main": [
+                [
+                    {
+                        "node": "Send Confirmation Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Confirmation Email": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Success",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "pinData": {},
+    "settings": {
+        "executionOrder": "v1"
+    }
+}

@@ -19,6 +19,15 @@ export default {
     const STRIPE_KEY = env.STRIPE_SECRET_KEY || 'sk_test_51SWlJVPpmaMxWLdbbV11gU22FGcs31wR0c7CtNV3NgKSdTW2ofdTMJgWexCC0Pff2jPaFgpOsdROcai6qrq3K95s00GMdBfZJd';
 
     // ---------------------------------------------------------
+    // ROUTE: Status Page (GET /)
+    // ---------------------------------------------------------
+    if (request.method === 'GET' && url.pathname === '/') {
+      return new Response('Butkeviča Dental Stripe Proxy - Worker is running! ✅', {
+        headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
+      });
+    }
+
+    // ---------------------------------------------------------
     // ROUTE: Create Checkout Session
     // ---------------------------------------------------------
     if (request.method === 'POST' && (url.pathname === '/' || url.pathname === '/create-session')) {
