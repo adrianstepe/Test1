@@ -36,6 +36,14 @@ export default {
         formData.append('success_url', body.success_url);
         formData.append('cancel_url', body.cancel_url);
 
+        // Pass Metadata so we get it back in the Webhook (Crucial for Emails)
+        formData.append('metadata[booking_date]', body.booking.date);
+        formData.append('metadata[booking_time]', body.booking.time);
+        formData.append('metadata[service_id]', body.booking.serviceId);
+        formData.append('metadata[customer_name]', body.customer.name);
+        formData.append('metadata[customer_email]', body.customer.email);
+        formData.append('customer_email', body.customer.email); // Pre-fill email in Stripe Checkout
+
         // Call Stripe API directly via fetch
         const stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
           method: 'POST',
