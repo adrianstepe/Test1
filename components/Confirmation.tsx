@@ -8,6 +8,42 @@ interface ConfirmationProps {
 }
 
 const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
+
+  const getEventDetails = () => {
+    if (!booking.selectedDate || !booking.selectedTime || !booking.selectedService) return null;
+
+    const [hours, minutes] = booking.selectedTime.split(':').map(Number);
+    const startDate = new Date(booking.selectedDate);
+    startDate.setHours(hours, minutes);
+
+    const endDate = new Date(startDate);
+    endDate.setMinutes(startDate.getMinutes() + (booking.selectedService.durationMinutes || 60));
+
+    return {
+      title: `Dentist: ${booking.selectedService.name[language]}`,
+      description: `Appointment with ${booking.selectedSpecialist?.name || 'Specialist'}. Service: ${booking.selectedService.name[language]}`,
+      location: 'Butkeviča Dental Practice',
+      start: startDate,
+      end: endDate
+    };
+  };
+
+  const addToGoogleCalendar = () => {
+    const event = getEventDetails();
+    if (!event) return;
+
+    const formatDate = (date: Date) => date.toISOString().replace(/-|:|\.\d\d\d/g, "");
+
+    const url = new URL("https://calendar.google.com/calendar/render");
+    url.searchParams.append("action", "TEMPLATE");
+    url.searchParams.append("text", event.title);
+    url.searchParams.append("details", event.description);
+    url.searchParams.append("location", event.location);
+    url.searchParams.append("dates", `${formatDate(event.start)}/${formatDate(event.end)}`);
+
+    window.open(url.toString(), "_blank");
+  };
+
   return (
     <div className="animate-fade-in text-center py-10">
       <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600 dark:text-green-400 text-4xl">
@@ -38,11 +74,11 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
       </div>
 
       <div className="space-y-3">
-        <button className="w-full max-w-xs mx-auto block py-3 px-4 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800">
+        <button
+          onClick={addToGoogleCalendar}
+          className="w-full max-w-xs mx-auto block py-3 px-4 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800"
+        >
           📅 {TEXTS.addToCalendar[language]} (Google)
-        </button>
-        <button className="w-full max-w-xs mx-auto block py-3 px-4 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800">
-          📅 {TEXTS.addToCalendar[language]} (Outlook/iCal)
         </button>
       </div>
     </div>
