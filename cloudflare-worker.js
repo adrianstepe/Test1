@@ -13,7 +13,7 @@ export default {
     }
 
     const url = new URL(request.url);
-    
+
     // API Key Strategy: Use env var if available, otherwise fallback to the key provided in instructions
     // Note: The key provided starts with sk_test_, which is a Secret Key. It works for Backend calls.
     const STRIPE_KEY = env.STRIPE_SECRET_KEY || 'sk_test_51SWlJVPpmaMxWLdbbV11gU22FGcs31wR0c7CtNV3NgKSdTW2ofdTMJgWexCC0Pff2jPaFgpOsdROcai6qrq3K95s00GMdBfZJd';
@@ -24,7 +24,7 @@ export default {
     if (request.method === 'POST' && (url.pathname === '/' || url.pathname === '/create-session')) {
       try {
         const body = await request.json();
-        
+
         // Construct form-urlencoded body for Stripe API
         const formData = new URLSearchParams();
         formData.append('payment_method_types[]', 'card');
@@ -68,14 +68,49 @@ export default {
     // ---------------------------------------------------------
     // ROUTE: Webhook Placeholder
     // ---------------------------------------------------------
+    // ---------------------------------------------------------
+    // ROUTE: Webhook Endpoint (Stripe -> Worker -> n8n)
+    // ---------------------------------------------------------
     if (request.method === 'POST' && url.pathname.endsWith('/webhook')) {
-      // Without the stripe-node library, signature verification is complex.
-      // For this implementation, we accept the event to satisfy requirements.
-      // In production, use the stripe-node library for signature verification.
-      return new Response(JSON.stringify({ received: true }), { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      });
+      try {
+        const payload = await request.text();
+        const sig = request.headers.get('stripe-signature');
+
+        // In a real app, verify signature here using stripe-node or crypto
+        // const event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
+
+        // For now, parse JSON directly (MVP)
+        const event = JSON.parse(payload);
+
+        // -------------------------------------------------------
+        // FORWARD TO N8N
+        // -------------------------------------------------------
+        // Replace this URL with your actual n8n Production Webhook URL
+        const N8N_WEBHOOK_URL = env.N8N_WEBHOOK_URL || 'https://n8n.srv1152467.hstgr.cloud/webhook/webhook/stripe';
+
+        // Only forward relevant events to reduce noise
+        if (event.type === 'checkout.session.completed') {
+          console.log(`Forwarding event ${event.id} to n8n...`);
+
+          // Fire and forget (don't wait for n8n response to reply to Stripe)
+          ctx.waitUntil(
+            fetch(N8N_WEBHOOK_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(event)
+            }).catch(err => console.error("Failed to forward to n8n:", err))
+          );
+        }
+
+        return new Response(JSON.stringify({ received: true }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+
+      } catch (err) {
+        console.error(`Webhook Error: ${err.message}`);
+        return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+      }
     }
 
     return new Response('Not Found', { status: 404, headers: corsHeaders });
