@@ -10,17 +10,20 @@ export async function onRequestPost(context) {
         const N8N_WEBHOOK_URL = env.N8N_WEBHOOK_URL || 'https://n8n.srv1152467.hstgr.cloud/webhook/stripe-confirmation-webhook';
 
         if (event.type === 'checkout.session.completed') {
-            // Fire and forget forwarding
-            context.waitUntil(
-                fetch(N8N_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(event)
-                }).catch(err => console.error("Failed to forward to n8n:", err))
-            );
+            // Synchronous forwarding for debugging
+            const n8nResponse = await fetch(N8N_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(event)
+            });
+
+            if (!n8nResponse.ok) {
+                const errorText = await n8nResponse.text();
+                return new Response(`n8n Error: ${n8nResponse.status} ${errorText}`, { status: 502 });
+            }
         }
 
-        return new Response(JSON.stringify({ received: true }), {
+        return new Response(JSON.stringify({ received: true, forwarded: true }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' }
         });

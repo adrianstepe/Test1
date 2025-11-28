@@ -4,7 +4,8 @@
         {
             "parameters": {
                 "httpMethod": "POST",
-                "path": "webhook/stripe",
+                "path": "stripe-confirmation-webhook",
+                "responseMode": "onReceived",
                 "options": {}
             },
             "type": "n8n-nodes-base.webhook",
@@ -26,15 +27,11 @@
                         {
                             "value2": "checkout.session.completed",
                             "output": 0
-                        },
-                        {
-                            "value2": "checkout.session.expired",
-                            "output": 1
                         }
                     ]
                 }
             },
-            "name": "Event Type Switch",
+            "name": "Event Type Filter",
             "type": "n8n-nodes-base.switch",
             "typeVersion": 1,
             "position": [
@@ -84,7 +81,7 @@
             "typeVersion": 3.4,
             "position": [
                 650,
-                200
+                300
             ],
             "id": "extract-data"
         },
@@ -92,7 +89,7 @@
             "parameters": {
                 "resource": "message",
                 "subject": "✅ Appointment Confirmed - Butkeviča Dental",
-                "message": "=Hi {{$json.customer_name}},\n\nThank you for your payment of €{{$json.amount_paid}}!\n\nYour dental appointment is confirmed:\n📅 Date: {{$json.booking_date}}\n⏰ Time: {{$json.booking_time}}\n\nWe look forward to seeing you!\n\nIf you need to reschedule or have any questions, please contact us.\n\nBest regards,\nButkeviča Dental Practice\n\n---\nThis is an automated confirmation email.",
+                "message": "Hi {{$json.customer_name}},\n\nThank you for your payment of €{{$json.amount_paid}}!\n\nYour dental appointment is confirmed:\n📅 Date: {{$json.booking_date}}\n⏰ Time: {{$json.booking_time}}\n\nWe look forward to seeing you!\n\nIf you need to reschedule or have any questions, please contact us.\n\nBest regards,\nButkeviča Dental Practice\n\n---\nThis is an automated confirmation email.",
                 "toEmail": "={{$json.customer_email}}",
                 "options": {}
             },
@@ -101,7 +98,7 @@
             "typeVersion": 1,
             "position": [
                 850,
-                200
+                300
             ],
             "id": "send-gmail",
             "credentials": {
@@ -110,34 +107,6 @@
                     "name": "Gmail account"
                 }
             }
-        },
-        {
-            "parameters": {
-                "respondWith": "json",
-                "responseBody": "={{ { \"success\": true, \"message\": \"Payment confirmed, email sent\" } }}"
-            },
-            "name": "Respond Success",
-            "type": "n8n-nodes-base.respondToWebhook",
-            "typeVersion": 1,
-            "position": [
-                1050,
-                200
-            ],
-            "id": "respond-success"
-        },
-        {
-            "parameters": {
-                "respondWith": "json",
-                "responseBody": "={{ { \"success\": false, \"message\": \"Session expired\" } }}"
-            },
-            "name": "Respond Expired",
-            "type": "n8n-nodes-base.respondToWebhook",
-            "typeVersion": 1,
-            "position": [
-                650,
-                400
-            ],
-            "id": "respond-expired"
         }
     ],
     "connections": {
@@ -145,25 +114,18 @@
             "main": [
                 [
                     {
-                        "node": "Event Type Switch",
+                        "node": "Event Type Filter",
                         "type": "main",
                         "index": 0
                     }
                 ]
             ]
         },
-        "Event Type Switch": {
+        "Event Type Filter": {
             "main": [
                 [
                     {
                         "node": "Extract Booking Data",
-                        "type": "main",
-                        "index": 0
-                    }
-                ],
-                [
-                    {
-                        "node": "Respond Expired",
                         "type": "main",
                         "index": 0
                     }
@@ -175,17 +137,6 @@
                 [
                     {
                         "node": "Send Confirmation Email",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Send Confirmation Email": {
-            "main": [
-                [
-                    {
-                        "node": "Respond Success",
                         "type": "main",
                         "index": 0
                     }
