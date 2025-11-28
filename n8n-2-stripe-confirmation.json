@@ -85,8 +85,9 @@
         },
         {
             "parameters": {
+                "resource": "message",
                 "operation": "send",
-                "sendTo": "={{$json.customer_email}}",
+                "toEmail": "={{$json.customer_email}}",
                 "subject": "✅ Appointment Confirmed - Butkeviča Dental",
                 "message": "=Hi {{$json.customer_name}},\n\nThank you for your payment of €{{$json.amount_paid}}!\n\n📅 Your dental appointment is confirmed:\nDate: {{$json.booking_date}}\nTime: {{$json.booking_time}}\n\nWe look forward to seeing you!\n\nIf you need to reschedule or have any questions, please contact us.\n\nBest regards,\nButkeviča Dental Practice",
                 "options": {}
