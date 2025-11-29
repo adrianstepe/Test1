@@ -90,8 +90,8 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
             onClick={() => onSelectSpecialist(null)}
             className={`min - w - [140px] p - 4 rounded - xl border - 2 flex flex - col items - center justify - center transition - all snap - start ${
   selectedSpecialist === null
-  ? 'border-primary bg-teal-50 dark:bg-teal-900/20'
-  : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
+    ? 'border-primary bg-teal-50 dark:bg-teal-900/20'
+    : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
 } `}
           >
             <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center text-2xl mb-2">
@@ -106,8 +106,8 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
               onClick={() => onSelectSpecialist(spec)}
               className={`min - w - [140px] p - 4 rounded - xl border - 2 flex flex - col items - center transition - all snap - start ${
   selectedSpecialist?.id === spec.id
-  ? 'border-primary bg-teal-50 dark:bg-teal-900/20'
-  : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
+    ? 'border-primary bg-teal-50 dark:bg-teal-900/20'
+    : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
 } `}
             >
               <img src={spec.photoUrl} alt={spec.name} className="w-16 h-16 rounded-full object-cover mb-2 border border-gray-100 dark:border-slate-600" />
@@ -160,10 +160,10 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
                   onClick={() => onSelectTime(slot.time)}
                   className={`py - 3 px - 2 rounded - lg text - sm font - medium border transition - all ${
   !slot.available
-  ? 'bg-gray-50 dark:bg-slate-800/50 text-gray-300 dark:text-slate-600 border-transparent cursor-not-allowed decoration-slice'
-  : selectedTime === slot.time
-    ? 'bg-primary text-white border-primary shadow-md'
-    : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-slate-700 hover:border-primary hover:text-primary'
+    ? 'bg-gray-50 dark:bg-slate-800/50 text-gray-300 dark:text-slate-600 border-transparent cursor-not-allowed decoration-slice'
+    : selectedTime === slot.time
+      ? 'bg-primary text-white border-primary shadow-md'
+      : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-slate-700 hover:border-primary hover:text-primary'
 } `}
                 >
                   {slot.time}
