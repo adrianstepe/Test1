@@ -1,4 +1,3 @@
-```typescript
 import React, { useState, useEffect } from 'react';
 import { Language, Specialist, Service, TimeSlot } from '../types';
 import { SPECIALISTS, TEXTS } from '../constants';
@@ -48,18 +47,18 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
   useEffect(() => {
     const fetchRealSlots = async () => {
       if (!selectedDate) return;
-      
+
       setLoading(true);
       setSlots([]); // Clear old slots while loading
 
       try {
         // Format YYYY-MM-DD (Local Time) to ensure n8n gets the correct day
         // We use 'en-CA' because it outputs YYYY-MM-DD consistently
-        const dateStr = selectedDate.toLocaleDateString('en-CA'); 
-        
+        const dateStr = selectedDate.toLocaleDateString('en-CA');
+
         // Call the service
         const data = await checkAvailability(dateStr);
-        
+
         if (data && data.slots) {
           setSlots(data.slots);
         }
@@ -88,11 +87,10 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
           {/* Option for "Any Specialist" */}
           <button
             onClick={() => onSelectSpecialist(null)}
-            className={`min - w - [140px] p - 4 rounded - xl border - 2 flex flex - col items - center justify - center transition - all snap - start ${
-  selectedSpecialist === null
-    ? 'border-primary bg-teal-50 dark:bg-teal-900/20'
-    : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
-} `}
+            className={`min-w-[140px] p-4 rounded-xl border-2 flex flex-col items-center justify-center transition-all snap-start ${selectedSpecialist === null
+                ? 'border-primary bg-teal-50 dark:bg-teal-900/20'
+                : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
+              } `}
           >
             <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center text-2xl mb-2">
               🏥
@@ -104,11 +102,10 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
             <button
               key={spec.id}
               onClick={() => onSelectSpecialist(spec)}
-              className={`min - w - [140px] p - 4 rounded - xl border - 2 flex flex - col items - center transition - all snap - start ${
-  selectedSpecialist?.id === spec.id
-    ? 'border-primary bg-teal-50 dark:bg-teal-900/20'
-    : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
-} `}
+              className={`min-w-[140px] p-4 rounded-xl border-2 flex flex-col items-center transition-all snap-start ${selectedSpecialist?.id === spec.id
+                  ? 'border-primary bg-teal-50 dark:bg-teal-900/20'
+                  : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
+                } `}
             >
               <img src={spec.photoUrl} alt={spec.name} className="w-16 h-16 rounded-full object-cover mb-2 border border-gray-100 dark:border-slate-600" />
               <span className="text-sm font-bold text-gray-800 dark:text-gray-100 text-center">{spec.name}</span>
@@ -129,11 +126,10 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
               <button
                 key={date.toISOString()}
                 onClick={() => onSelectDate(date)}
-                className={`min - w - [70px] p - 3 rounded - xl border transition - all flex flex - col items - center ${
-  isSelected
-    ? 'bg-secondary text-white border-secondary shadow-lg transform scale-105'
-    : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:border-primary dark:hover:border-primary'
-} `}
+                className={`min-w-[70px] p-3 rounded-xl border transition-all flex flex-col items-center ${isSelected
+                    ? 'bg-secondary text-white border-secondary shadow-lg transform scale-105'
+                    : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:border-primary dark:hover:border-primary'
+                  } `}
               >
                 <span className="text-xs uppercase font-medium mb-1 opacity-80">{dayName}</span>
                 <span className="text-xl font-bold">{dayNum}</span>
@@ -158,20 +154,19 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
                   key={slot.time}
                   disabled={!slot.available}
                   onClick={() => onSelectTime(slot.time)}
-                  className={`py - 3 px - 2 rounded - lg text - sm font - medium border transition - all ${
-  !slot.available
-    ? 'bg-gray-50 dark:bg-slate-800/50 text-gray-300 dark:text-slate-600 border-transparent cursor-not-allowed decoration-slice'
-    : selectedTime === slot.time
-      ? 'bg-primary text-white border-primary shadow-md'
-      : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-slate-700 hover:border-primary hover:text-primary'
-} `}
+                  className={`py-3 px-2 rounded-lg text-sm font-medium border transition-all ${!slot.available
+                      ? 'bg-gray-50 dark:bg-slate-800/50 text-gray-300 dark:text-slate-600 border-transparent cursor-not-allowed decoration-slice'
+                      : selectedTime === slot.time
+                        ? 'bg-primary text-white border-primary shadow-md'
+                        : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-slate-700 hover:border-primary hover:text-primary'
+                    } `}
                 >
                   {slot.time}
                 </button>
               ))}
             </div>
             {selectedDate && slots.length === 0 && (
-               <p className="text-center text-gray-500 dark:text-gray-400 mt-4 text-sm">No slots available for this date.</p>
+              <p className="text-center text-gray-500 dark:text-gray-400 mt-4 text-sm">No slots available for this date.</p>
             )}
             {selectedDate && slots.length > 0 && slots.every(s => !s.available) && (
               <p className="text-center text-gray-500 dark:text-gray-400 mt-4 text-sm">All slots are fully booked.</p>
