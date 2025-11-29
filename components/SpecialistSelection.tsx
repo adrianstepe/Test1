@@ -1,6 +1,8 @@
+```typescript
 import React, { useState, useEffect } from 'react';
 import { Language, Specialist, Service, TimeSlot } from '../types';
 import { SPECIALISTS, TEXTS } from '../constants';
+import { checkAvailability } from '../services/api';
 
 interface SpecialistSelectionProps {
   language: Language;
@@ -23,12 +25,13 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
   onSelectDate,
   onSelectTime,
 }) => {
-  // Mock logic: Filter specialists who can perform the selected service
+  // Filter specialists who can perform the selected service
   const availableSpecialists = SPECIALISTS.filter(s => s.specialties.includes(selectedService.id));
 
   // Generate next 7 days
   const [dates, setDates] = useState<Date[]>([]);
   const [slots, setSlots] = useState<TimeSlot[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const nextDays = [];
@@ -41,19 +44,33 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
     if (!selectedDate) onSelectDate(nextDays[0]);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // REAL AVAILABILITY CHECK
   useEffect(() => {
-    // Mock Slots Generation based on selected specialist and random logic
-    if (selectedDate) {
-      const mockSlots: TimeSlot[] = [
-        { time: '09:00', available: Math.random() > 0.3 },
-        { time: '10:00', available: Math.random() > 0.3 },
-        { time: '11:30', available: Math.random() > 0.3 },
-        { time: '13:00', available: Math.random() > 0.3 },
-        { time: '14:30', available: Math.random() > 0.3 },
-        { time: '16:00', available: Math.random() > 0.3 },
-      ];
-      setSlots(mockSlots);
-    }
+    const fetchRealSlots = async () => {
+      if (!selectedDate) return;
+      
+      setLoading(true);
+      setSlots([]); // Clear old slots while loading
+
+      try {
+        // Format YYYY-MM-DD (Local Time) to ensure n8n gets the correct day
+        // We use 'en-CA' because it outputs YYYY-MM-DD consistently
+        const dateStr = selectedDate.toLocaleDateString('en-CA'); 
+        
+        // Call the service
+        const data = await checkAvailability(dateStr);
+        
+        if (data && data.slots) {
+          setSlots(data.slots);
+        }
+      } catch (error) {
+        console.error("Failed to load slots", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRealSlots();
   }, [selectedDate, selectedSpecialist]);
 
   const formatDate = (date: Date) => {
@@ -71,10 +88,11 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
           {/* Option for "Any Specialist" */}
           <button
             onClick={() => onSelectSpecialist(null)}
-            className={`min-w-[140px] p-4 rounded-xl border-2 flex flex-col items-center justify-center transition-all snap-start ${selectedSpecialist === null
-                ? 'border-primary bg-teal-50 dark:bg-teal-900/20'
-                : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
-              }`}
+            className={`min - w - [140px] p - 4 rounded - xl border - 2 flex flex - col items - center justify - center transition - all snap - start ${
+  selectedSpecialist === null
+  ? 'border-primary bg-teal-50 dark:bg-teal-900/20'
+  : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
+} `}
           >
             <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center text-2xl mb-2">
               🏥
@@ -86,10 +104,11 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
             <button
               key={spec.id}
               onClick={() => onSelectSpecialist(spec)}
-              className={`min-w-[140px] p-4 rounded-xl border-2 flex flex-col items-center transition-all snap-start ${selectedSpecialist?.id === spec.id
-                  ? 'border-primary bg-teal-50 dark:bg-teal-900/20'
-                  : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
-                }`}
+              className={`min - w - [140px] p - 4 rounded - xl border - 2 flex flex - col items - center transition - all snap - start ${
+  selectedSpecialist?.id === spec.id
+  ? 'border-primary bg-teal-50 dark:bg-teal-900/20'
+  : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
+} `}
             >
               <img src={spec.photoUrl} alt={spec.name} className="w-16 h-16 rounded-full object-cover mb-2 border border-gray-100 dark:border-slate-600" />
               <span className="text-sm font-bold text-gray-800 dark:text-gray-100 text-center">{spec.name}</span>
@@ -110,10 +129,11 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
               <button
                 key={date.toISOString()}
                 onClick={() => onSelectDate(date)}
-                className={`min-w-[70px] p-3 rounded-xl border transition-all flex flex-col items-center ${isSelected
-                    ? 'bg-secondary text-white border-secondary shadow-lg transform scale-105'
-                    : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:border-primary dark:hover:border-primary'
-                  }`}
+                className={`min - w - [70px] p - 3 rounded - xl border transition - all flex flex - col items - center ${
+  isSelected
+    ? 'bg-secondary text-white border-secondary shadow-lg transform scale-105'
+    : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:border-primary dark:hover:border-primary'
+} `}
               >
                 <span className="text-xs uppercase font-medium mb-1 opacity-80">{dayName}</span>
                 <span className="text-xl font-bold">{dayNum}</span>
@@ -125,25 +145,38 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
 
       {/* Time Slots */}
       <div>
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-          {slots.map((slot) => (
-            <button
-              key={slot.time}
-              disabled={!slot.available}
-              onClick={() => onSelectTime(slot.time)}
-              className={`py-3 px-2 rounded-lg text-sm font-medium border transition-all ${!slot.available
-                  ? 'bg-gray-50 dark:bg-slate-800/50 text-gray-300 dark:text-slate-600 border-transparent cursor-not-allowed decoration-slice'
-                  : selectedTime === slot.time
-                    ? 'bg-primary text-white border-primary shadow-md'
-                    : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-slate-700 hover:border-primary hover:text-primary'
-                }`}
-            >
-              {slot.time}
-            </button>
-          ))}
-        </div>
-        {selectedDate && slots.every(s => !s.available) && (
-          <p className="text-center text-gray-500 dark:text-gray-400 mt-4 text-sm">No slots available for this date.</p>
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-primary"></div>
+            <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm">Checking availability...</p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+              {slots.map((slot) => (
+                <button
+                  key={slot.time}
+                  disabled={!slot.available}
+                  onClick={() => onSelectTime(slot.time)}
+                  className={`py - 3 px - 2 rounded - lg text - sm font - medium border transition - all ${
+  !slot.available
+  ? 'bg-gray-50 dark:bg-slate-800/50 text-gray-300 dark:text-slate-600 border-transparent cursor-not-allowed decoration-slice'
+  : selectedTime === slot.time
+    ? 'bg-primary text-white border-primary shadow-md'
+    : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-slate-700 hover:border-primary hover:text-primary'
+} `}
+                >
+                  {slot.time}
+                </button>
+              ))}
+            </div>
+            {selectedDate && slots.length === 0 && (
+               <p className="text-center text-gray-500 dark:text-gray-400 mt-4 text-sm">No slots available for this date.</p>
+            )}
+            {selectedDate && slots.length > 0 && slots.every(s => !s.available) && (
+              <p className="text-center text-gray-500 dark:text-gray-400 mt-4 text-sm">All slots are fully booked.</p>
+            )}
+          </>
         )}
       </div>
     </div>
