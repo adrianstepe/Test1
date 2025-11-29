@@ -28,20 +28,40 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
     };
   };
 
-  const addToGoogleCalendar = () => {
-    const event = getEventDetails();
-    if (!event) return;
+  const [syncLoading, setSyncLoading] = React.useState(false);
 
-    const formatDate = (date: Date) => date.toISOString().replace(/-|:|\.\d\d\d/g, "");
+  const addToGoogleCalendar = async () => {
+    if (syncLoading) return;
+    setSyncLoading(true);
 
-    const url = new URL("https://calendar.google.com/calendar/render");
-    url.searchParams.append("action", "TEMPLATE");
-    url.searchParams.append("text", event.title);
-    url.searchParams.append("details", event.description);
-    url.searchParams.append("location", event.location);
-    url.searchParams.append("dates", `${formatDate(event.start)}/${formatDate(event.end)}`);
+    try {
+      // Use a placeholder URL that the user needs to configure
+      const webhookUrl = "https://YOUR_N8N_INSTANCE/webhook/manual-calendar-sync";
 
-    window.open(url.toString(), "_blank");
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          customer_name: `${booking.patientData.firstName} ${booking.patientData.lastName}`,
+          customer_email: booking.patientData.email,
+          service_name: booking.selectedService?.name[language],
+          booking_date: booking.selectedDate ? new Date(booking.selectedDate).toISOString().split('T')[0] : '',
+          booking_time: booking.selectedTime
+        })
+      });
+
+      if (response.ok) {
+        alert(TEXTS.successMsg[language] || "Added to Calendar!");
+      } else {
+        console.error("Failed to sync calendar");
+      }
+    } catch (error) {
+      console.error("Error syncing calendar:", error);
+    } finally {
+      setSyncLoading(false);
+    }
   };
 
   return (
@@ -76,9 +96,10 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
       <div className="space-y-3">
         <button
           onClick={addToGoogleCalendar}
-          className="w-full max-w-xs mx-auto block py-3 px-4 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800"
+          disabled={syncLoading}
+          className={`w-full max-w-xs mx-auto block py-3 px-4 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 ${syncLoading ? 'opacity-50 cursor-wait' : ''}`}
         >
-          📅 {TEXTS.addToCalendar[language]} (Google)
+          📅 {syncLoading ? 'Syncing...' : `${TEXTS.addToCalendar[language]} (Google)`}
         </button>
       </div>
     </div>

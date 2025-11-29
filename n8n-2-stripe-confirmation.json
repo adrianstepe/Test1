@@ -39,7 +39,7 @@
         },
         {
             "parameters": {
-                "jsCode": "// Robust Data Extraction\n// This prevents crashes and guarantees an email string exists\n\nconst item = $input.first();\nconst body = item.json.body;\n\n// Safely access nested objects (returns undefined instead of crashing)\nconst dataObject = body?.data?.object || {};\nconst metadata = dataObject.metadata || {};\nconst customerDetails = dataObject.customer_details || {};\n\n// 1. Determine Name\nconst customerName = customerDetails.name || metadata.customer_name || 'Valued Patient';\n\n// 2. Determine Email (With Safety Fallback)\n// If no email is found, we use a placeholder to prevent the Gmail node from throwing \"Bad Request\"\nlet customerEmail = customerDetails.email || metadata.customer_email;\nif (!customerEmail) {\n  customerEmail = 'no-email-found@error.com'; // Fallback to allow debugging\n}\n\n// 3. Amount\nconst amountPaid = ((dataObject.amount_total || 0) / 100).toFixed(2);\n\nreturn [{\n  customer_name: customerName,\n  customer_email: customerEmail,\n  booking_date: metadata.booking_date || 'N/A',\n  booking_time: metadata.booking_time || 'N/A',\n  service_id: metadata.service_id,\n  amount_paid: amountPaid,\n  payment_status: dataObject.payment_status\n}];"
+                "jsCode": "// Robust Data Extraction\n// This prevents crashes and guarantees an email string exists\n\nconst item = $input.first();\nconst body = item.json.body;\n\n// Safely access nested objects (returns undefined instead of crashing)\nconst dataObject = body?.data?.object || {};\nconst metadata = dataObject.metadata || {};\nconst customerDetails = dataObject.customer_details || {};\n\n// 1. Determine Name\nconst customerName = customerDetails.name || metadata.customer_name || 'Valued Patient';\n\n// 2. Determine Email (With Safety Fallback)\n// If no email is found, we use a placeholder to prevent the Gmail node from throwing \"Bad Request\"\nlet customerEmail = customerDetails.email || metadata.customer_email;\nif (!customerEmail) {\n  customerEmail = 'no-email-found@error.com'; // Fallback to allow debugging\n}\n\n// 3. Amount\nconst amountPaid = ((dataObject.amount_total || 0) / 100).toFixed(2);\n\n// 4. Calculate Calendar Times\nconst bookingDate = metadata.booking_date; // YYYY-MM-DD\nconst bookingTime = metadata.booking_time; // HH:mm\nlet start = '';\nlet end = '';\n\nif (bookingDate && bookingTime) {\n  // Create date object (assuming local time or UTC as per input, usually safer to treat as local for simple bookings)\n  // Note: In a real prod env, timezone handling is critical. Here we assume the input is \"YYYY-MM-DD\" and \"HH:mm\"\n  const startDate = new Date(`${bookingDate}T${bookingTime}:00`);\n  start = startDate.toISOString();\n  // Default duration: 1 hour\n  const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);\n  end = endDate.toISOString();\n}\n\nreturn [{\n  customer_name: customerName,\n  customer_email: customerEmail,\n  booking_date: bookingDate || 'N/A',\n  booking_time: bookingTime || 'N/A',\n  service_id: metadata.service_id,\n  service_name: metadata.serviceName || 'Dental Appointment',\n  amount_paid: amountPaid,\n  payment_status: dataObject.payment_status,\n  event_start: start,\n  event_end: end\n}];"
             },
             "name": "Extract Booking Data",
             "type": "n8n-nodes-base.code",
@@ -49,6 +49,37 @@
                 -64
             ],
             "id": "be4dcbbe-9967-4df1-a9ec-0e922b74faf7"
+        },
+        {
+            "parameters": {
+                "calendar": {
+                    "__rl": true,
+                    "mode": "list",
+                    "value": "primary"
+                },
+                "start": "={{$json.event_start}}",
+                "end": "={{$json.event_end}}",
+                "summary": "={{$json.service_name}} - {{$json.customer_name}}",
+                "description": "=Booking for {{$json.customer_name}}\nEmail: {{$json.customer_email}}\nService: {{$json.service_name}}\nPaid: €{{$json.amount_paid}}",
+                "attendees": [
+                    "={{$json.customer_email}}"
+                ],
+                "options": {}
+            },
+            "name": "Google Calendar",
+            "type": "n8n-nodes-base.googleCalendar",
+            "typeVersion": 1,
+            "position": [
+                640,
+                -64
+            ],
+            "id": "google-calendar-node",
+            "credentials": {
+                "googleCalendarOAuth2": {
+                    "id": "YOUR_GOOGLE_CALENDAR_CREDENTIAL_ID",
+                    "name": "Google Calendar account"
+                }
+            }
         },
         {
             "parameters": {
@@ -62,7 +93,7 @@
             "type": "n8n-nodes-base.gmail",
             "typeVersion": 2.1,
             "position": [
-                640,
+                840,
                 -64
             ],
             "id": "aac16f8b-af35-48b3-b429-07ab974b1909",
@@ -71,6 +102,65 @@
                 "gmailOAuth2": {
                     "id": "bsHsQyITlAn3DBQk",
                     "name": "Gmail account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "manual-calendar-sync",
+                "options": {}
+            },
+            "name": "Webhook (Manual)",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                32,
+                200
+            ],
+            "id": "webhook-manual"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Format Manual Data\nconst body = $input.first().json.body;\n\nconst bookingDate = body.booking_date; // YYYY-MM-DD\nconst bookingTime = body.booking_time; // HH:mm\nlet start = '';\nlet end = '';\n\nif (bookingDate && bookingTime) {\n  const startDate = new Date(`${bookingDate}T${bookingTime}:00`);\n  start = startDate.toISOString();\n  const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);\n  end = endDate.toISOString();\n}\n\nreturn [{\n  customer_name: body.customer_name,\n  customer_email: body.customer_email,\n  service_name: body.service_name,\n  event_start: start,\n  event_end: end\n}];"
+            },
+            "name": "Format Manual Data",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                240,
+                200
+            ],
+            "id": "format-manual-data"
+        },
+        {
+            "parameters": {
+                "calendar": {
+                    "__rl": true,
+                    "mode": "list",
+                    "value": "primary"
+                },
+                "start": "={{$json.event_start}}",
+                "end": "={{$json.event_end}}",
+                "summary": "={{$json.service_name}} - {{$json.customer_name}}",
+                "description": "=Manual Sync: Booking for {{$json.customer_name}}\nEmail: {{$json.customer_email}}\nService: {{$json.service_name}}",
+                "attendees": [
+                    "={{$json.customer_email}}"
+                ],
+                "options": {}
+            },
+            "name": "Google Calendar (Manual)",
+            "type": "n8n-nodes-base.googleCalendar",
+            "typeVersion": 1,
+            "position": [
+                440,
+                200
+            ],
+            "id": "google-calendar-manual",
+            "credentials": {
+                "googleCalendarOAuth2": {
+                    "id": "YOUR_GOOGLE_CALENDAR_CREDENTIAL_ID",
+                    "name": "Google Calendar account"
                 }
             }
         }
@@ -102,7 +192,40 @@
             "main": [
                 [
                     {
+                        "node": "Google Calendar",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Calendar": {
+            "main": [
+                [
+                    {
                         "node": "Send Confirmation Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook (Manual)": {
+            "main": [
+                [
+                    {
+                        "node": "Format Manual Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Manual Data": {
+            "main": [
+                [
+                    {
+                        "node": "Google Calendar (Manual)",
                         "type": "main",
                         "index": 0
                     }
