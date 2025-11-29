@@ -9,10 +9,10 @@
             "type": "n8n-nodes-base.webhook",
             "typeVersion": 2,
             "position": [
-                32,
-                -64
+                16,
+                -48
             ],
-            "id": "4ff840a4-1c71-49a4-863b-793edd5b97e3",
+            "id": "df923bf3-dd03-4082-8f05-84af2d2268e2",
             "name": "Webhook",
             "webhookId": "45c1830b-9364-4b68-9c7d-e8ea2dade456"
         },
@@ -33,9 +33,9 @@
             "typeVersion": 1,
             "position": [
                 240,
-                -64
+                -80
             ],
-            "id": "a07c1749-f2c2-450a-82cc-4b5980ac7764"
+            "id": "07283b7e-4c87-4418-bfb0-cef24ac11df1"
         },
         {
             "parameters": {
@@ -45,14 +45,14 @@
             "type": "n8n-nodes-base.code",
             "typeVersion": 2,
             "position": [
-                432,
-                -64
+                464,
+                -48
             ],
-            "id": "be4dcbbe-9967-4df1-a9ec-0e922b74faf7"
+            "id": "c84ec803-f6e8-4511-b8cd-f76c64c5ad96"
         },
         {
             "parameters": {
-                "sendTo": "={{$json.customer_email}}",
+                "sendTo": "={{ $('Extract Booking Data').first().json.customer_email }}",
                 "subject": "✅ Appointment Confirmed - Butkeviča Dental",
                 "emailType": "text",
                 "message": "=Hi {{ $('Extract Booking Data').first().json.customer_name }},\n\nThank you for your payment of €{{ $('Extract Booking Data').first().json.amount_paid }}!\n\nYour dental appointment is confirmed:\n📅 Date: {{ $('Extract Booking Data').first().json.booking_date }}\n⏰ Time: {{ $('Extract Booking Data').first().json.booking_time }}\n\nWe look forward to seeing you!\n\nIf you need to reschedule or have any questions, please contact us.\n\nBest regards,\nButkeviča Dental Practice\n\n---\nThis is an automated confirmation email.",
@@ -62,10 +62,10 @@
             "type": "n8n-nodes-base.gmail",
             "typeVersion": 2.1,
             "position": [
-                840,
-                -64
+                688,
+                -48
             ],
-            "id": "aac16f8b-af35-48b3-b429-07ab974b1909",
+            "id": "e258604d-10d0-4a24-905a-9e139ac2ded9",
             "webhookId": "b0276529-77fc-4b38-abf8-4401acef7bc4",
             "credentials": {
                 "gmailOAuth2": {
@@ -76,31 +76,49 @@
         },
         {
             "parameters": {
+                "mode": "raw",
+                "jsonOutput": "={\n  \"body\": {\n    \"customer_name\": \"{{ $json.body.customer_name && $json.body.customer_name.trim() !== '' ? $json.body.customer_name : 'Test Customer' }}\",\n    \"customer_email\": \"{{ $json.body.customer_email && $json.body.customer_email !== '' ? $json.body.customer_email : 'test@example.com' }}\",\n    \"booking_date\": \"{{ $json.body.booking_date && $json.body.booking_date !== '' ? $json.body.booking_date : $today.format('yyyy-MM-dd') }}\",\n    \"booking_time\": \"{{ $json.body.booking_time && $json.body.booking_time !== null ? $json.body.booking_time : '14:00' }}\",\n    \"service_name\": \"{{ $json.body.service_name || 'General Checkup' }}\"\n  }\n}",
+                "options": {}
+            },
+            "id": "070f8ead-2825-46b1-9bc6-d40e411806dc",
+            "name": "Fix/Debug Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                240,
+                208
+            ],
+            "notesInFlow": true,
+            "notes": "If Webhook is empty,\nthis inserts dummy data\nso you can test."
+        },
+        {
+            "parameters": {
                 "httpMethod": "POST",
                 "path": "manual-calendar-sync",
                 "options": {}
             },
-            "name": "Webhook (Manual)",
+            "id": "3e91e341-5b21-4460-9899-3c9fb9a7d111",
+            "name": "Webhook (Manual)1",
             "type": "n8n-nodes-base.webhook",
             "typeVersion": 2,
             "position": [
-                32,
-                200
+                16,
+                208
             ],
-            "id": "webhook-manual"
+            "webhookId": "60860d87-19b1-4f7e-8637-ccd82a74e333"
         },
         {
             "parameters": {
-                "jsCode": "// Format Manual Data\nconst body = $input.first().json.body;\n\nconst bookingDate = body.booking_date; // YYYY-MM-DD\nconst bookingTime = body.booking_time; // HH:mm\nlet start = '';\nlet end = '';\n\nif (bookingDate && bookingTime) {\n  const startDate = new Date(`${bookingDate}T${bookingTime}:00`);\n  start = startDate.toISOString();\n  const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);\n  end = endDate.toISOString();\n}\n\nreturn [{\n  customer_name: body.customer_name,\n  customer_email: body.customer_email,\n  service_name: body.service_name,\n  event_start: start,\n  event_end: end\n}];"
+                "jsCode": "// Format Manual Data\nconst body = $input.first().json.body;\n\n// 1. Validate Data\n// If the previous node didn't fix it, we stop here to prevent Google Error 400\nif (!body.booking_date || !body.booking_time) {\n  throw new Error(\"❌ STOP: Data is still missing. Check your website form.\");\n}\n\nconst bookingDate = body.booking_date; // YYYY-MM-DD\nconst bookingTime = body.booking_time; // HH:mm\n\n// 2. Create Date Object\n// We explicitly construct the ISO string to be safe\nconst startString = `${bookingDate}T${bookingTime}:00`;\nconst startDate = new Date(startString);\n\n// Check if date is valid\nif (isNaN(startDate.getTime())) {\n   throw new Error(`Invalid Date generated: ${startString}`);\n}\n\n// 3. Add 1 hour for end time\nconst endDate = new Date(startDate.getTime() + 60 * 60 * 1000);\n\n// 4. Return correct structure\nreturn [{\n  customer_name: body.customer_name,\n  customer_email: body.customer_email,\n  service_name: body.service_name,\n  event_start: startDate.toISOString(),\n  event_end: endDate.toISOString(),\n  description: `Customer: ${body.customer_name}\\nService: ${body.service_name}`\n}];"
             },
-            "name": "Format Manual Data",
+            "id": "062b6ae6-ea7d-4fa3-9a52-64759116af02",
+            "name": "Format Manual Data1",
             "type": "n8n-nodes-base.code",
             "typeVersion": 2,
             "position": [
-                240,
-                200
-            ],
-            "id": "format-manual-data"
+                464,
+                208
+            ]
         },
         {
             "parameters": {
@@ -109,27 +127,25 @@
                     "mode": "list",
                     "value": "primary"
                 },
-                "start": "={{$json.event_start}}",
-                "end": "={{$json.event_end}}",
-                "summary": "={{$json.service_name}} - {{$json.customer_name}}",
-                "description": "=Manual Sync: Booking for {{$json.customer_name}}\nEmail: {{$json.customer_email}}\nService: {{$json.service_name}}",
-                "attendees": [
-                    "={{$json.customer_email}}"
-                ],
-                "options": {}
+                "start": "={{ $json.event_start }}",
+                "end": "={{ $json.event_end }}",
+                "additionalFields": {
+                    "description": "={{ $json.description }}",
+                    "summary": "=Appointment: {{ $json.customer_name }}"
+                }
             },
-            "name": "Google Calendar Manual",
+            "id": "127db834-36c0-4559-9a75-a1df2210245b",
+            "name": "Google Calendar Manual1",
             "type": "n8n-nodes-base.googleCalendar",
             "typeVersion": 1,
             "position": [
-                440,
-                200
+                688,
+                208
             ],
-            "id": "google-calendar-manual",
             "credentials": {
-                "googleCalendarOAuth2": {
-                    "id": "YOUR_GOOGLE_CALENDAR_CREDENTIAL_ID",
-                    "name": "Google Calendar account"
+                "googleCalendarOAuth2Api": {
+                    "id": "MC4P3mZxV4TOWrs8",
+                    "name": "Google Calendar account 2"
                 }
             }
         }
@@ -168,22 +184,33 @@
                 ]
             ]
         },
-        "Webhook (Manual)": {
+        "Fix/Debug Data": {
             "main": [
                 [
                     {
-                        "node": "Format Manual Data",
+                        "node": "Format Manual Data1",
                         "type": "main",
                         "index": 0
                     }
                 ]
             ]
         },
-        "Format Manual Data": {
+        "Webhook (Manual)1": {
             "main": [
                 [
                     {
-                        "node": "Google Calendar Manual",
+                        "node": "Fix/Debug Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Manual Data1": {
+            "main": [
+                [
+                    {
+                        "node": "Google Calendar Manual1",
                         "type": "main",
                         "index": 0
                     }
