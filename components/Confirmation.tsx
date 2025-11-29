@@ -31,6 +31,12 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
   const [syncLoading, setSyncLoading] = React.useState(false);
 
   const addToGoogleCalendar = async () => {
+    // 1. Validation
+    if (!booking.selectedDate || !booking.patientData.email) {
+      alert('Booking data missing. Please refresh');
+      return;
+    }
+
     if (syncLoading) return;
     setSyncLoading(true);
 
@@ -47,7 +53,8 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
           customer_name: `${booking.patientData.firstName} ${booking.patientData.lastName}`,
           customer_email: booking.patientData.email,
           service_name: booking.selectedService?.name[language],
-          booking_date: booking.selectedDate ? new Date(booking.selectedDate).toISOString().split('T')[0] : '',
+          // Fix Timezone: Send local YYYY-MM-DD
+          booking_date: new Date(booking.selectedDate).toLocaleDateString('en-CA'),
           booking_time: booking.selectedTime
         })
       });
