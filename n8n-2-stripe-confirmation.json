@@ -1,20 +1,18 @@
 {
-    "name": "Stripe Handler (Complete - No DB)",
     "nodes": [
         {
             "parameters": {
                 "httpMethod": "POST",
                 "path": "stripe-confirmation-webhook",
-                "responseMode": "onReceived",
                 "options": {}
             },
             "type": "n8n-nodes-base.webhook",
-            "typeVersion": 2.1,
+            "typeVersion": 2,
             "position": [
-                250,
-                300
+                32,
+                -64
             ],
-            "id": "webhook-stripe",
+            "id": "4ff840a4-1c71-49a4-863b-793edd5b97e3",
             "name": "Webhook",
             "webhookId": "45c1830b-9364-4b68-9c7d-e8ea2dade456"
         },
@@ -25,8 +23,7 @@
                 "rules": {
                     "rules": [
                         {
-                            "value2": "checkout.session.completed",
-                            "output": 0
+                            "value2": "checkout.session.completed"
                         }
                     ]
                 }
@@ -35,75 +32,44 @@
             "type": "n8n-nodes-base.switch",
             "typeVersion": 1,
             "position": [
-                450,
-                300
+                240,
+                -64
             ],
-            "id": "event-switch"
+            "id": "a07c1749-f2c2-450a-82cc-4b5980ac7764"
         },
         {
             "parameters": {
-                "mode": "returnFalse",
-                "values": {
-                    "string": [
-                        {
-                            "name": "customer_name",
-                            "value": "={{$json.body.data.object.metadata.customer_name}}"
-                        },
-                        {
-                            "name": "customer_email",
-                            "value": "={{$json.body.data.object.metadata.customer_email}}"
-                        },
-                        {
-                            "name": "booking_date",
-                            "value": "={{$json.body.data.object.metadata.booking_date}}"
-                        },
-                        {
-                            "name": "booking_time",
-                            "value": "={{$json.body.data.object.metadata.booking_time}}"
-                        },
-                        {
-                            "name": "service_id",
-                            "value": "={{$json.body.data.object.metadata.service_id}}"
-                        },
-                        {
-                            "name": "amount_paid",
-                            "value": "={{$json.body.data.object.amount_total / 100}}"
-                        },
-                        {
-                            "name": "payment_status",
-                            "value": "={{$json.body.data.object.payment_status}}"
-                        }
-                    ]
-                }
+                "jsCode": "// Robust Data Extraction\n// This prevents crashes and guarantees an email string exists\n\nconst item = $input.first();\nconst body = item.json.body;\n\n// Safely access nested objects (returns undefined instead of crashing)\nconst dataObject = body?.data?.object || {};\nconst metadata = dataObject.metadata || {};\nconst customerDetails = dataObject.customer_details || {};\n\n// 1. Determine Name\nconst customerName = customerDetails.name || metadata.customer_name || 'Valued Patient';\n\n// 2. Determine Email (With Safety Fallback)\n// If no email is found, we use a placeholder to prevent the Gmail node from throwing \"Bad Request\"\nlet customerEmail = customerDetails.email || metadata.customer_email;\nif (!customerEmail) {\n  customerEmail = 'no-email-found@error.com'; // Fallback to allow debugging\n}\n\n// 3. Amount\nconst amountPaid = ((dataObject.amount_total || 0) / 100).toFixed(2);\n\nreturn [{\n  customer_name: customerName,\n  customer_email: customerEmail,\n  booking_date: metadata.booking_date || 'N/A',\n  booking_time: metadata.booking_time || 'N/A',\n  service_id: metadata.service_id,\n  amount_paid: amountPaid,\n  payment_status: dataObject.payment_status\n}];"
             },
             "name": "Extract Booking Data",
-            "type": "n8n-nodes-base.set",
-            "typeVersion": 3.4,
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
             "position": [
-                650,
-                300
+                432,
+                -64
             ],
-            "id": "extract-data"
+            "id": "be4dcbbe-9967-4df1-a9ec-0e922b74faf7"
         },
         {
             "parameters": {
-                "resource": "message",
+                "sendTo": "={{$json.customer_email}}",
                 "subject": "✅ Appointment Confirmed - Butkeviča Dental",
-                "message": "Hi {{$json.customer_name}},\n\nThank you for your payment of €{{$json.amount_paid}}!\n\nYour dental appointment is confirmed:\n📅 Date: {{$json.booking_date}}\n⏰ Time: {{$json.booking_time}}\n\nWe look forward to seeing you!\n\nIf you need to reschedule or have any questions, please contact us.\n\nBest regards,\nButkeviča Dental Practice\n\n---\nThis is an automated confirmation email.",
-                "toEmail": "={{$json.customer_email}}",
+                "emailType": "text",
+                "message": "=Hi {{$json.customer_name}},\n\nThank you for your payment of €{{$json.amount_paid}}!\n\nYour dental appointment is confirmed:\n📅 Date: {{$json.booking_date}}\n⏰ Time: {{$json.booking_time}}\n\nWe look forward to seeing you!\n\nIf you need to reschedule or have any questions, please contact us.\n\nBest regards,\nButkeviča Dental Practice\n\n---\nThis is an automated confirmation email.",
                 "options": {}
             },
             "name": "Send Confirmation Email",
             "type": "n8n-nodes-base.gmail",
-            "typeVersion": 1,
+            "typeVersion": 2.1,
             "position": [
-                850,
-                300
+                640,
+                -64
             ],
-            "id": "send-gmail",
+            "id": "aac16f8b-af35-48b3-b429-07ab974b1909",
+            "webhookId": "b0276529-77fc-4b38-abf8-4401acef7bc4",
             "credentials": {
                 "gmailOAuth2": {
-                    "id": "YOUR_GMAIL_CREDENTIAL_ID",
+                    "id": "bsHsQyITlAn3DBQk",
                     "name": "Gmail account"
                 }
             }
@@ -145,7 +111,8 @@
         }
     },
     "pinData": {},
-    "settings": {
-        "executionOrder": "v1"
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "edb1e678c20bb2dc211861028fa5a0da62086103c19f921423bcdc604ef1f332"
     }
 }

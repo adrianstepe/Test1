@@ -42,6 +42,9 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
       const successUrl = `${baseUrl}?success=1`;
       const cancelUrl = `${baseUrl}?cancel=1`;
 
+      // 1. Format the date to ISO string (YYYY-MM-DD) to ensure stability
+      const isoDate = booking.selectedDate ? new Date(booking.selectedDate).toISOString().split('T')[0] : '';
+
       // 1. Call Backend to create Checkout Session
       const apiUrl = import.meta.env.VITE_API_URL || 'https://stripe-mvp-proxy.adriansbusinessw.workers.dev/';
       const response = await fetch(apiUrl, {
@@ -55,16 +58,18 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
           service: service.name[Language.EN],
           success_url: successUrl,
           cancel_url: cancelUrl,
-          // Pass full booking details
           customer: {
             name: `${booking.patientData.firstName} ${booking.patientData.lastName}`,
             email: booking.patientData.email,
             phone: booking.patientData.phone
           },
           booking: {
-            date: booking.selectedDate,
+            // UPDATED: Send the clean ISO date string
+            date: isoDate,
             time: booking.selectedTime,
-            serviceId: service.id
+            serviceId: service.id,
+            // OPTIONAL: Pass the translated service name for the Calendar Event Title
+            serviceName: service.name[booking.language] || service.name[Language.EN]
           }
         })
       });
