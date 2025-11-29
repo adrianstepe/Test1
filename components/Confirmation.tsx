@@ -35,8 +35,8 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
     setSyncLoading(true);
 
     try {
-      // Use a placeholder URL that the user needs to configure
-      const webhookUrl = "https://YOUR_N8N_INSTANCE/webhook/manual-calendar-sync";
+      // Use the actual n8n instance URL
+      const webhookUrl = "https://n8n.srv1152467.hstgr.cloud/webhook/manual-calendar-sync";
 
       const response = await fetch(webhookUrl, {
         method: 'POST',

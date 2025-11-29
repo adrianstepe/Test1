@@ -52,41 +52,10 @@
         },
         {
             "parameters": {
-                "calendar": {
-                    "__rl": true,
-                    "mode": "list",
-                    "value": "primary"
-                },
-                "start": "={{$json.event_start}}",
-                "end": "={{$json.event_end}}",
-                "summary": "={{$json.service_name}} - {{$json.customer_name}}",
-                "description": "=Booking for {{$json.customer_name}}\nEmail: {{$json.customer_email}}\nService: {{$json.service_name}}\nPaid: €{{$json.amount_paid}}",
-                "attendees": [
-                    "={{$json.customer_email}}"
-                ],
-                "options": {}
-            },
-            "name": "Google Calendar",
-            "type": "n8n-nodes-base.googleCalendar",
-            "typeVersion": 1,
-            "position": [
-                640,
-                -64
-            ],
-            "id": "google-calendar-node",
-            "credentials": {
-                "googleCalendarOAuth2": {
-                    "id": "YOUR_GOOGLE_CALENDAR_CREDENTIAL_ID",
-                    "name": "Google Calendar account"
-                }
-            }
-        },
-        {
-            "parameters": {
                 "sendTo": "={{$json.customer_email}}",
                 "subject": "✅ Appointment Confirmed - Butkeviča Dental",
                 "emailType": "text",
-                "message": "=Hi {{$json.customer_name}},\n\nThank you for your payment of €{{$json.amount_paid}}!\n\nYour dental appointment is confirmed:\n📅 Date: {{$json.booking_date}}\n⏰ Time: {{$json.booking_time}}\n\nWe look forward to seeing you!\n\nIf you need to reschedule or have any questions, please contact us.\n\nBest regards,\nButkeviča Dental Practice\n\n---\nThis is an automated confirmation email.",
+                "message": "=Hi {{ $('Extract Booking Data').first().json.customer_name }},\n\nThank you for your payment of €{{ $('Extract Booking Data').first().json.amount_paid }}!\n\nYour dental appointment is confirmed:\n📅 Date: {{ $('Extract Booking Data').first().json.booking_date }}\n⏰ Time: {{ $('Extract Booking Data').first().json.booking_time }}\n\nWe look forward to seeing you!\n\nIf you need to reschedule or have any questions, please contact us.\n\nBest regards,\nButkeviča Dental Practice\n\n---\nThis is an automated confirmation email.",
                 "options": {}
             },
             "name": "Send Confirmation Email",
@@ -149,7 +118,7 @@
                 ],
                 "options": {}
             },
-            "name": "Google Calendar (Manual)",
+            "name": "Google Calendar Manual",
             "type": "n8n-nodes-base.googleCalendar",
             "typeVersion": 1,
             "position": [
@@ -192,17 +161,6 @@
             "main": [
                 [
                     {
-                        "node": "Google Calendar",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Google Calendar": {
-            "main": [
-                [
-                    {
                         "node": "Send Confirmation Email",
                         "type": "main",
                         "index": 0
@@ -225,7 +183,7 @@
             "main": [
                 [
                     {
-                        "node": "Google Calendar (Manual)",
+                        "node": "Google Calendar Manual",
                         "type": "main",
                         "index": 0
                     }
