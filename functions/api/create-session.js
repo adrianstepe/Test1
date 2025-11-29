@@ -36,6 +36,7 @@ export async function onRequestPost(context) {
             formData.append('metadata[booking_date]', body.booking.date);
             formData.append('metadata[booking_time]', body.booking.time);
             formData.append('metadata[service_id]', body.booking.serviceId);
+            formData.append('metadata[serviceName]', body.booking.serviceName || 'Dental Service');
         }
         if (body.customer) {
             formData.append('metadata[customer_name]', body.customer.name);

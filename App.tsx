@@ -10,23 +10,42 @@ import { Language, BookingState, Service } from './types';
 import { TEXTS } from './constants';
 
 const App: React.FC = () => {
-  const [booking, setBooking] = useState<BookingState>({
-    step: 1,
-    language: Language.LV,
-    selectedService: null,
-    selectedSpecialist: null,
-    selectedDate: null,
-    selectedTime: null,
-    patientData: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      details: '',
-      gdprConsent: false,
-      marketingConsent: false,
-      medicalPhoto: null
+  const [booking, setBooking] = useState<BookingState>(() => {
+    // Lazy Initialization: Synchronously read from localStorage to prevent race conditions
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('butkevicaBookingState');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          // Restore Date object
+          if (parsed.selectedDate) {
+            parsed.selectedDate = new Date(parsed.selectedDate);
+          }
+          return parsed;
+        } catch (e) {
+          console.error("Failed to parse saved booking state", e);
+        }
+      }
     }
+    // Default State
+    return {
+      step: 1,
+      language: Language.LV,
+      selectedService: null,
+      selectedSpecialist: null,
+      selectedDate: null,
+      selectedTime: null,
+      patientData: {
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        details: '',
+        gdprConsent: false,
+        marketingConsent: false,
+        medicalPhoto: null
+      }
+    };
   });
 
   // Handle browser back button within the widget context (optional enhancement)
@@ -44,20 +63,8 @@ const App: React.FC = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('success') === '1') {
-      const savedState = localStorage.getItem('butkevicaBookingState');
-      if (savedState) {
-        try {
-          const parsed = JSON.parse(savedState);
-          // Restore Date object from string
-          if (parsed.selectedDate) {
-            parsed.selectedDate = new Date(parsed.selectedDate);
-          }
-          // Set state and jump to confirmation
-          setBooking({ ...parsed, step: 5 });
-        } catch (e) {
-          console.error("Failed to restore booking state", e);
-        }
-      }
+      // State is already loaded via lazy init, just advance step
+      setBooking(prev => ({ ...prev, step: 5 }));
     }
   }, []);
 
