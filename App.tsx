@@ -8,6 +8,7 @@ import PaymentMock from './components/PaymentMock';
 import Confirmation from './components/Confirmation';
 import { Language, BookingState, Service } from './types';
 import { TEXTS } from './constants';
+import { checkAvailability } from './services/api';
 
 const App: React.FC = () => {
   const [booking, setBooking] = useState<BookingState>(() => {
@@ -66,6 +67,23 @@ const App: React.FC = () => {
       // State is already loaded via lazy init, just advance step
       setBooking(prev => ({ ...prev, step: 5 }));
     }
+  }, []);
+
+  // Pre-fetch availability to warm up the n8n workflow
+  useEffect(() => {
+    const warmUp = async () => {
+      try {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const dateStr = tomorrow.toLocaleDateString('en-CA');
+        console.log("Warming up availability workflow for:", dateStr);
+        await checkAvailability(dateStr);
+      } catch (e) {
+        // Ignore errors during warm-up
+        console.log("Warm-up failed (expected if offline):", e);
+      }
+    };
+    warmUp();
   }, []);
 
   const updateBooking = (updates: Partial<BookingState>) => {

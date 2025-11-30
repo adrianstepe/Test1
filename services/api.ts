@@ -24,7 +24,7 @@ export const checkAvailability = async (date: string): Promise<{ slots: TimeSlot
         const data = await response.json();
         return data; // Expecting { slots: [...] } from n8n
     } catch (error) {
-        console.error("Availability Fetch Error:", error);
+        console.error("CRITICAL: Availability Fetch Error. Check network tab and n8n status.", error);
         // Return empty slots on error so the UI handles it gracefully
         return { slots: [] };
     }
