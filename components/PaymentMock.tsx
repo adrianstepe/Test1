@@ -150,6 +150,24 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
       </div>
 
       <div className="bg-gray-50 dark:bg-slate-800 p-6 rounded-xl border border-gray-200 dark:border-slate-700 mb-6">
+        <h3 className="font-bold text-gray-900 dark:text-white mb-4">{TEXTS.personalInfo[language]}</h3>
+        <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+          <div className="flex justify-between">
+            <span>{TEXTS.firstName[language]} {TEXTS.lastName[language]}</span>
+            <span className="font-medium text-gray-900 dark:text-white">{booking.patientData.firstName} {booking.patientData.lastName}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>{TEXTS.email[language]}</span>
+            <span className="font-medium text-gray-900 dark:text-white">{booking.patientData.email}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>{TEXTS.phone[language]}</span>
+            <span className="font-medium text-gray-900 dark:text-white">{booking.patientData.phone}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-gray-50 dark:bg-slate-800 p-6 rounded-xl border border-gray-200 dark:border-slate-700 mb-6">
         <h3 className="font-bold text-gray-900 dark:text-white mb-4">{TEXTS.total[language]}</h3>
         <div className="flex justify-between text-sm mb-2 text-gray-600 dark:text-gray-400">
           <span>{service.name[language]}</span>

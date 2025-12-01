@@ -77,8 +77,8 @@ const PatientForm: React.FC<PatientFormProps> = ({ language, data, updateData })
               type="tel"
               required
               className="w-full p-3 border border-gray-300 dark:border-slate-600 rounded-r-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-              value={data.phone}
-              onChange={(e) => updateData({ phone: e.target.value })}
+              value={data.phone.replace(countryCode, '')}
+              onChange={(e) => updateData({ phone: `${countryCode}${e.target.value}` })}
               placeholder="20000000"
             />
           </div>
