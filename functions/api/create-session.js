@@ -38,6 +38,8 @@ export async function onRequestPost(context) {
             formData.append('metadata[service_id]', body.booking.serviceId);
             formData.append('metadata[serviceName]', body.booking.serviceName || 'Dental Service');
             formData.append('metadata[language]', body.booking.language || 'en');
+            if (body.booking.doctor_id) formData.append('metadata[doctor_id]', body.booking.doctor_id);
+            if (body.booking.doctor_name) formData.append('metadata[doctor_name]', body.booking.doctor_name);
         }
         if (body.customer) {
             formData.append('metadata[customer_name]', body.customer.name);

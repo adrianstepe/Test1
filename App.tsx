@@ -9,7 +9,7 @@ import Confirmation from './components/Confirmation';
 import { Language, BookingState, Service } from './types';
 import { TEXTS } from './constants';
 import { checkAvailability } from './services/api';
-import AdminDashboard from './components/AdminDashboard';
+import DashboardLayout from './components/dashboard/DashboardLayout';
 
 const App: React.FC = () => {
   // 1. Check for Admin Mode
@@ -159,7 +159,7 @@ const App: React.FC = () => {
 
   // 3. RENDER ADMIN DASHBOARD IF URL HAS ?admin=true
   if (isAdmin) {
-    return <AdminDashboard />;
+    return <DashboardLayout />;
   }
 
   return (

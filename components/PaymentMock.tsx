@@ -70,7 +70,9 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
             serviceId: service.id,
             // OPTIONAL: Pass the translated service name for the Calendar Event Title
             serviceName: service.name[booking.language] || service.name[Language.EN],
-            language: booking.language
+            language: booking.language,
+            doctor_id: booking.selectedSpecialist?.id || null,
+            doctor_name: booking.selectedSpecialist?.name || null
           }
         })
       });
