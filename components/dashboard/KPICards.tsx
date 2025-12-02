@@ -1,19 +1,24 @@
 import React from 'react';
 import { CalendarCheck, Users, Clock, CreditCard, TrendingUp, TrendingDown } from 'lucide-react';
+import { DashboardStats } from '../../hooks/useDashboardData';
 
-const KPICards: React.FC = () => {
-    const stats = [
+interface KPICardsProps {
+    stats: DashboardStats;
+}
+
+const KPICards: React.FC<KPICardsProps> = ({ stats }) => {
+    const kpiData = [
         {
             label: 'Appointments Today',
-            value: '12',
-            change: '+2',
-            trend: 'up',
+            value: stats.appointmentsToday.toString(),
+            change: 'Live',
+            trend: 'neutral',
             icon: CalendarCheck,
             color: 'bg-blue-500',
         },
         {
             label: 'Patients Waiting',
-            value: '3',
+            value: stats.patientsWaiting.toString(),
             change: 'On time',
             trend: 'neutral',
             icon: Users,
@@ -21,16 +26,16 @@ const KPICards: React.FC = () => {
         },
         {
             label: 'Pending Requests',
-            value: '5',
-            change: '-1',
-            trend: 'down',
+            value: stats.pendingRequests.toString(),
+            change: 'Action needed',
+            trend: stats.pendingRequests > 0 ? 'down' : 'neutral',
             icon: Clock,
             color: 'bg-amber-500',
         },
         {
             label: 'Revenue (Est.)',
-            value: '€1,250',
-            change: '+15%',
+            value: `€${stats.revenue}`,
+            change: 'Total',
             trend: 'up',
             icon: CreditCard,
             color: 'bg-indigo-500',
@@ -39,7 +44,7 @@ const KPICards: React.FC = () => {
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {stats.map((stat, index) => {
+            {kpiData.map((stat, index) => {
                 const Icon = stat.icon;
                 return (
                     <div key={index} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -56,11 +61,10 @@ const KPICards: React.FC = () => {
                             {stat.trend === 'up' && <TrendingUp size={16} className="text-green-500" />}
                             {stat.trend === 'down' && <TrendingDown size={16} className="text-red-500" />}
                             <span className={`text-xs font-medium ${stat.trend === 'up' ? 'text-green-600' :
-                                    stat.trend === 'down' ? 'text-red-600' : 'text-slate-400'
+                                stat.trend === 'down' ? 'text-red-600' : 'text-slate-400'
                                 }`}>
                                 {stat.change}
                             </span>
-                            <span className="text-xs text-slate-400">vs yesterday</span>
                         </div>
                     </div>
                 );

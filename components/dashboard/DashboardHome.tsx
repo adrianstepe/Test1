@@ -1,64 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '@/supabaseClient';
 import KPICards from './KPICards';
 import AppointmentList from './AppointmentList';
 import CalendarView from './CalendarView';
 import { Bell, ChevronDown, Check } from 'lucide-react';
 import { SPECIALISTS } from '../../constants';
-
-interface Booking {
-    id: string;
-    created_at: string;
-    customer_name: string;
-    customer_email: string;
-    service_name: string;
-    start_time: string;
-    status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-    doctor_id?: string;
-    doctor_name?: string;
-}
+import { useDashboardData } from '../../hooks/useDashboardData';
 
 const DashboardHome: React.FC = () => {
-    const [bookings, setBookings] = useState<Booking[]>([]);
-    const [loading, setLoading] = useState(true);
     const [viewAs, setViewAs] = useState<string>('all'); // 'all' or doctor_id
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+    // Fetch data using our new hook
+    const { bookings, loading, stats, refresh } = useDashboardData({
+        doctorId: viewAs
+    });
 
     const activeDoctorName = viewAs === 'all'
         ? 'All Doctors'
         : SPECIALISTS.find(s => s.id === viewAs)?.name || 'Unknown Doctor';
-
-    useEffect(() => {
-        fetchBookings();
-    }, []);
-
-    const fetchBookings = async () => {
-        try {
-            setLoading(true);
-            const { data, error } = await supabase
-                .from('bookings')
-                .select('*')
-                .order('start_time', { ascending: true });
-
-            if (error) throw error;
-
-            // Mock doctor data for existing bookings if missing
-            const enrichedData = (data || []).map((b: any) => {
-                if (!b.doctor_id) {
-                    // Randomly assign a doctor for demo purposes
-                    const randomDoctor = SPECIALISTS[Math.floor(Math.random() * SPECIALISTS.length)];
-                    return { ...b, doctor_id: randomDoctor.id, doctor_name: randomDoctor.name };
-                }
-                return b;
-            });
-
-            setBookings(enrichedData);
-        } catch (error) {
-            console.error('Error fetching bookings:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const updateStatus = async (id: string, newStatus: string) => {
         const { error } = await supabase
@@ -69,9 +29,25 @@ const DashboardHome: React.FC = () => {
         if (error) {
             alert('Failed to update');
         } else {
-            fetchBookings();
+            refresh();
         }
     };
+
+    // Transform bookings for child components if necessary
+    // The hook returns data with joined tables, we might need to flatten it or pass as is.
+    // AppointmentList expects: Booking[] (defined locally there, might need update)
+    // Let's map our hook data to the shape expected by AppointmentList/CalendarView
+    const mappedBookings = bookings.map(b => ({
+        id: b.id,
+        created_at: b.created_at,
+        customer_name: b.customer_name,
+        customer_email: b.customer_email,
+        service_name: b.service?.name?.['EN'] || 'Unknown Service', // Default to EN or handle language
+        start_time: b.start_time,
+        status: b.status,
+        doctor_id: b.doctor_id,
+        doctor_name: b.doctor?.full_name || 'Unassigned'
+    }));
 
     return (
         <div className="flex-1 bg-gray-50 min-h-screen ml-64">
@@ -133,18 +109,18 @@ const DashboardHome: React.FC = () => {
             </header>
 
             <main className="p-8">
-                <KPICards />
+                <KPICards stats={stats} />
 
                 <div className="grid grid-cols-12 gap-6 h-[600px]">
                     <div className="col-span-12 lg:col-span-7 h-full">
                         <AppointmentList
-                            bookings={viewAs === 'all' ? bookings : bookings.filter(b => b.doctor_id === viewAs)}
+                            bookings={mappedBookings}
                             loading={loading}
                             onUpdateStatus={updateStatus}
                         />
                     </div>
                     <div className="col-span-12 lg:col-span-5 h-full">
-                        <CalendarView bookings={viewAs === 'all' ? bookings : bookings.filter(b => b.doctor_id === viewAs)} />
+                        <CalendarView bookings={mappedBookings} />
                     </div>
                 </div>
             </main>

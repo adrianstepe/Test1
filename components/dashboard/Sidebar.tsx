@@ -1,5 +1,7 @@
 import React from 'react';
 import { LayoutDashboard, Calendar, Users, MessageSquare, Settings, LogOut } from 'lucide-react';
+import { useUser } from '../../contexts/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 interface SidebarProps {
     activeTab: string;
@@ -7,6 +9,9 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
+    const { signOut } = useUser();
+    const navigate = useNavigate();
+
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { id: 'calendar', label: 'Calendar', icon: Calendar },
@@ -14,6 +19,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
         { id: 'messages', label: 'Messages', icon: MessageSquare },
         { id: 'settings', label: 'Settings', icon: Settings },
     ];
+
+    const handleSignOut = async () => {
+        await signOut();
+        navigate('/login');
+    };
 
     return (
         <div className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col fixed left-0 top-0 z-10">
@@ -36,8 +46,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
                             key={item.id}
                             onClick={() => setActiveTab(item.id)}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
-                                    ? 'bg-teal-50 text-teal-700 shadow-sm'
-                                    : 'text-slate-500 hover:bg-gray-50 hover:text-slate-900'
+                                ? 'bg-teal-50 text-teal-700 shadow-sm'
+                                : 'text-slate-500 hover:bg-gray-50 hover:text-slate-900'
                                 }`}
                         >
                             <Icon size={20} className={isActive ? 'text-teal-600' : 'text-slate-400'} />
@@ -49,7 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
 
             <div className="p-4 border-t border-gray-100">
                 <button
-                    onClick={() => window.location.href = '/'}
+                    onClick={handleSignOut}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
                 >
                     <LogOut size={20} />

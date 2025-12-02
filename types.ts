@@ -50,3 +50,12 @@ export interface PatientData {
 export interface Translations {
   [key: string]: Record<Language, string>;
 }
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  full_name?: string;
+  role: 'admin' | 'doctor' | 'receptionist';
+  avatar_url?: string;
+  color_code?: string;
+}
