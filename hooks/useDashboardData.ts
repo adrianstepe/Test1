@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
-import { SERVICES } from '../constants';
 import { startOfDay, endOfDay, isSameDay, parseISO } from 'date-fns';
 
 export interface DashboardBooking {
@@ -17,10 +16,15 @@ export interface DashboardBooking {
     doctor?: {
         full_name: string;
     };
-    service?: {
+    services?: {
         name: any; // JSONB
         price: number;
-        durationMinutes: number;
+    };
+    // Keep these for backward compatibility if needed, or map them from 'services'
+    service?: {
+        name: any;
+        price: number;
+        durationMinutes?: number;
     };
 }
 
@@ -44,23 +48,32 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
     const fetchBookings = async () => {
         try {
             setLoading(true);
+
+            // Get current user
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                console.log('No authenticated user found');
+                setLoading(false);
+                return;
+            }
+
+            console.log('Current User ID:', user.id);
+
             let query = supabase
                 .from('bookings')
                 .select(`
                     *,
-                    doctor:profiles(full_name)
+                    services (
+                        name,
+                        price
+                    )
                 `)
                 .order('start_time', { ascending: true });
 
-            if (doctorId && doctorId !== 'all') {
-                query = query.eq('doctor_id', doctorId);
-            }
+            // Filter by the logged-in doctor (user)
+            query = query.eq('doctor_id', user.id);
 
-            // If date range is provided, filter by it. 
-            // Note: This might need adjustment based on how you want to view "all time" vs "specific range"
-            // For now, let's fetch all and filter in memory for the calendar if needed, 
-            // or if the range is strict, apply it here.
-            // Given the requirement "Filter by Date: It should accept a date range", let's apply it if present.
             if (dateRange) {
                 query = query.gte('start_time', dateRange.start.toISOString())
                     .lte('start_time', dateRange.end.toISOString());
@@ -68,19 +81,22 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
 
             const { data, error } = await query;
 
+            console.log('Raw Data:', data, 'Error:', error);
+
             if (error) throw error;
 
-            // Map price_cents to price and flatten structure for components
+            // Map data to match the interface expected by components
             const mappedData = (data as any[]).map(b => {
-                const serviceDef = SERVICES.find(s => s.id === b.service_id);
+                // Handle the joined 'services' object
+                const serviceData = Array.isArray(b.services) ? b.services[0] : b.services;
+
                 return {
                     ...b,
-                    doctor_name: b.doctor?.full_name,
-                    service_name: serviceDef?.name?.['EN'] || 'Unknown Service',
-                    service: serviceDef ? {
-                        name: serviceDef.name,
-                        price: serviceDef.price,
-                        durationMinutes: serviceDef.durationMinutes
+                    service_name: serviceData?.name?.['EN'] || 'Unknown Service',
+                    service: serviceData ? {
+                        name: serviceData.name,
+                        price: serviceData.price,
+                        durationMinutes: 30 // Default or fetch if added to DB
                     } : undefined
                 };
             });
@@ -105,7 +121,6 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
                 { event: '*', schema: 'public', table: 'bookings' },
                 (payload) => {
                     console.log('Real-time update:', payload);
-                    // Refresh data on any change
                     fetchBookings();
                 }
             )
@@ -122,8 +137,6 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
 
         const appointmentsToday = todayBookings.filter(b => b.status !== 'cancelled').length;
 
-        // "Patients Waiting" could be interpreted as people in the waiting room (checked in?) 
-        // or just upcoming appointments today. Let's assume upcoming today.
         const patientsWaiting = todayBookings.filter(b =>
             b.status === 'confirmed' && new Date(b.start_time) > new Date()
         ).length;
