@@ -18,14 +18,22 @@ const LoginPage: React.FC = () => {
         setLoading(true);
         setError(null);
 
+        console.log("Attempting login with:", { email, password });
+
         try {
-            const { error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
 
-            if (error) throw error;
+            if (error) {
+                console.error("Supabase Error Full Detail:", error);
+                console.error("Error Message:", error.message);
+                alert(error.message);
+                throw error;
+            }
 
+            console.log("Login Success! User data:", data);
             navigate(from, { replace: true });
         } catch (err: any) {
             setError(err.message || 'Failed to sign in');
