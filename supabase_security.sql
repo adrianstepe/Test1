@@ -92,3 +92,10 @@ SELECT id, 'admin', 'System Admin'
 FROM auth.users
 WHERE id NOT IN (SELECT id FROM public.profiles)
 ON CONFLICT (id) DO NOTHING;
+
+-- 5. Ensure specific admin email has admin role (Run this manually if needed, or uncomment)
+-- INSERT INTO public.profiles (id, role, full_name)
+-- SELECT id, 'admin', 'System Admin'
+-- FROM auth.users
+-- WHERE email = 'admin@example.com'
+-- ON CONFLICT (id) DO UPDATE SET role = 'admin';
