@@ -9,8 +9,19 @@ import Confirmation from './components/Confirmation';
 import { Language, BookingState, Service } from './types';
 import { TEXTS } from './constants';
 import { checkAvailability } from './services/api';
+import AdminDashboard from './components/AdminDashboard';
 
 const App: React.FC = () => {
+  // 1. Check for Admin Mode
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('admin') === 'true') {
+      setIsAdmin(true);
+    }
+  }, []);
+
   const [booking, setBooking] = useState<BookingState>(() => {
     // Lazy Initialization: Synchronously read from localStorage to prevent race conditions
     if (typeof window !== 'undefined') {
@@ -146,6 +157,11 @@ const App: React.FC = () => {
     }
   };
 
+  // 3. RENDER ADMIN DASHBOARD IF URL HAS ?admin=true
+  if (isAdmin) {
+    return <AdminDashboard />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-20 transition-colors duration-300">
       <Header
@@ -235,6 +251,11 @@ const App: React.FC = () => {
           </div>
         )}
       </main>
+
+      {/* Hidden Link for You to Click */}
+      <div className="fixed bottom-2 right-2 opacity-10 hover:opacity-100">
+        <a href="?admin=true" className="text-xs text-gray-400">Admin</a>
+      </div>
     </div>
   );
 };
