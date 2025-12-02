@@ -1,15 +1,24 @@
 import React, { useState } from 'react';
 import { format, startOfWeek, addDays, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, parseISO, getHours, isToday } from 'date-fns';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Filter, Clock } from 'lucide-react';
+import { useUser } from '../../../contexts/UserContext';
+import { useEffect } from 'react';
 import { useDashboardData, DashboardBooking } from '../../../hooks/useDashboardData';
 import AppointmentDetailsModal from '../modals/AppointmentDetailsModal';
 import { supabase } from '../../../supabaseClient';
 
 const CalendarPage: React.FC = () => {
+    const { profile } = useUser();
     const [view, setView] = useState<'month' | 'week' | 'day'>('month');
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedBooking, setSelectedBooking] = useState<DashboardBooking | null>(null);
     const [doctorId, setDoctorId] = useState<string>('all');
+
+    useEffect(() => {
+        if (profile?.role === 'doctor') {
+            setDoctorId(profile.id);
+        }
+    }, [profile]);
 
     // Fetch data for the current view range
     // For simplicity, we'll fetch a broad range (e.g., current month +/- 1) or rely on the hook's default
