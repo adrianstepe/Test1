@@ -46,7 +46,7 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
                 .select(`
                     *,
                     doctor:profiles(full_name),
-                    service:services(name, price, durationMinutes)
+                    service:services(name, price_cents, durationMinutes)
                 `)
                 .order('start_time', { ascending: true });
 
@@ -68,7 +68,16 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
 
             if (error) throw error;
 
-            setBookings(data as DashboardBooking[]);
+            // Map price_cents to price
+            const mappedData = (data as any[]).map(b => ({
+                ...b,
+                service: b.service ? {
+                    ...b.service,
+                    price: (b.service.price_cents || 0) / 100
+                } : undefined
+            }));
+
+            setBookings(mappedData as DashboardBooking[]);
         } catch (err: any) {
             console.error('Error fetching dashboard data:', err);
             setError(err.message);
