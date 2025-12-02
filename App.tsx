@@ -5,8 +5,10 @@ import BookingWidget from './BookingWidget';
 import LoginPage from './components/auth/LoginPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import DashboardLayout from './components/dashboard/DashboardLayout';
+import DashboardHome from './components/dashboard/DashboardHome';
+import CalendarPage from './components/dashboard/pages/CalendarPage';
 
-const App: React.FC = () => {
+function App() {
   return (
     <UserProvider>
       <Router>
@@ -17,7 +19,14 @@ const App: React.FC = () => {
             path="/dashboard/*"
             element={
               <ProtectedRoute>
-                <DashboardLayout />
+                <DashboardLayout>
+                  <Routes>
+                    {/* Assuming DashboardHome is another component for the dashboard index */}
+                    {/* This component would need to be imported if it's not already */}
+                    <Route index element={<DashboardHome />} />
+                    <Route path="calendar" element={<CalendarPage />} />
+                  </Routes>
+                </DashboardLayout>
               </ProtectedRoute>
             }
           />
@@ -27,6 +36,7 @@ const App: React.FC = () => {
       </Router>
     </UserProvider>
   );
-};
+}
+;
 
 export default App;

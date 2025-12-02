@@ -44,7 +44,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
                     return (
                         <button
                             key={item.id}
-                            onClick={() => setActiveTab(item.id)}
+                            onClick={() => {
+                                setActiveTab(item.id);
+                                if (item.id === 'dashboard') navigate('/dashboard');
+                                else if (item.id === 'calendar') navigate('/dashboard/calendar');
+                                // Add other routes as they are implemented
+                            }}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
                                 ? 'bg-teal-50 text-teal-700 shadow-sm'
                                 : 'text-slate-500 hover:bg-gray-50 hover:text-slate-900'
