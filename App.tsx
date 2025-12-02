@@ -112,7 +112,15 @@ const App: React.FC = () => {
       case 2: return !!booking.selectedDate && !!booking.selectedTime;
       case 3:
         const { firstName, lastName, email, phone, gdprConsent } = booking.patientData;
-        return firstName && lastName && email && phone && gdprConsent;
+        // Phone must be longer than just the country code (e.g. "+371" is 4 chars)
+        // Email must look somewhat valid
+        return (
+          firstName.trim().length > 0 &&
+          lastName.trim().length > 0 &&
+          email.includes('@') &&
+          phone.length > 5 &&
+          gdprConsent
+        );
       case 4: return true; // Payment handled in component
       default: return false;
     }
