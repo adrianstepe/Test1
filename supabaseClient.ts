@@ -10,4 +10,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
     console.warn('Missing Supabase Environment Variables. Admin Dashboard will not work.');
 }
 
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '', {
+    auth: {
+        persistSession: true,
+        storageKey: 'butkevica-auth-token',
+        storage: window.localStorage,
+    },
+});
+
