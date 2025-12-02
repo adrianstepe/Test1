@@ -11,6 +11,8 @@ export interface DashboardBooking {
     status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
     doctor_id?: string;
     service_id?: string;
+    doctor_name?: string;
+    service_name?: string;
     doctor?: {
         full_name: string;
     };
@@ -68,9 +70,11 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
 
             if (error) throw error;
 
-            // Map price_cents to price
+            // Map price_cents to price and flatten structure for components
             const mappedData = (data as any[]).map(b => ({
                 ...b,
+                doctor_name: b.doctor?.full_name,
+                service_name: b.service?.name?.['EN'] || b.service?.name, // Handle JSONB or string
                 service: b.service ? {
                     ...b.service,
                     price: (b.service.price_cents || 0) / 100
