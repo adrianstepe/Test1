@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
+import { SERVICES } from '../constants';
 import { startOfDay, endOfDay, isSameDay, parseISO } from 'date-fns';
 
 export interface DashboardBooking {
@@ -47,8 +48,7 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
                 .from('bookings')
                 .select(`
                     *,
-                    doctor:profiles(full_name),
-                    service:services(name, price_cents, durationMinutes)
+                    doctor:profiles(full_name)
                 `)
                 .order('start_time', { ascending: true });
 
@@ -71,15 +71,19 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
             if (error) throw error;
 
             // Map price_cents to price and flatten structure for components
-            const mappedData = (data as any[]).map(b => ({
-                ...b,
-                doctor_name: b.doctor?.full_name,
-                service_name: b.service?.name?.['EN'] || b.service?.name, // Handle JSONB or string
-                service: b.service ? {
-                    ...b.service,
-                    price: (b.service.price_cents || 0) / 100
-                } : undefined
-            }));
+            const mappedData = (data as any[]).map(b => {
+                const serviceDef = SERVICES.find(s => s.id === b.service_id);
+                return {
+                    ...b,
+                    doctor_name: b.doctor?.full_name,
+                    service_name: serviceDef?.name?.['EN'] || 'Unknown Service',
+                    service: serviceDef ? {
+                        name: serviceDef.name,
+                        price: serviceDef.price,
+                        durationMinutes: serviceDef.durationMinutes
+                    } : undefined
+                };
+            });
 
             setBookings(mappedData as DashboardBooking[]);
         } catch (err: any) {
