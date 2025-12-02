@@ -253,8 +253,9 @@ const App: React.FC = () => {
       </main>
 
       {/* Hidden Link for You to Click */}
-      <div className="fixed bottom-2 right-2 opacity-10 hover:opacity-100">
-        <a href="?admin=true" className="text-xs text-gray-400">Admin</a>
+      {/* Hidden Link for You to Click */}
+      <div className="fixed bottom-2 right-2 opacity-50 hover:opacity-100 z-50">
+        <a href="?admin=true" className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded shadow-sm">Admin</a>
       </div>
     </div>
   );
