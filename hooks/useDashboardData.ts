@@ -69,6 +69,9 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
                         name,
                         price_cents,
                         duration_minutes
+                    ),
+                    doctor:doctor_id (
+                        full_name
                     )
                 `)
                 .order('start_time', { ascending: true });
@@ -93,14 +96,20 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
             const mappedData = (data as any[]).map(b => {
                 // Handle the joined 'services' object
                 const serviceData = Array.isArray(b.services) ? b.services[0] : b.services;
+                // Handle the joined 'doctor' object
+                const doctorData = Array.isArray(b.doctor) ? b.doctor[0] : b.doctor;
 
                 return {
                     ...b,
-                    service_name: serviceData?.name?.['EN'] || 'Unknown Service',
+                    service_name: serviceData?.name || 'Unknown Service',
+                    doctor_name: doctorData?.full_name || 'Unassigned',
                     service: serviceData ? {
                         name: serviceData.name,
                         price: serviceData.price_cents ? serviceData.price_cents / 100 : 0,
                         durationMinutes: serviceData.duration_minutes || 30
+                    } : undefined,
+                    doctor: doctorData ? {
+                        full_name: doctorData.full_name
                     } : undefined
                 };
             });

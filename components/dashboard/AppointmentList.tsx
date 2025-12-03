@@ -79,26 +79,26 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
     };
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full">
-            <div className="p-5 border-b border-gray-100 flex flex-col gap-4 bg-white sticky top-0 z-10">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden flex flex-col h-full">
+            <div className="p-5 border-b border-gray-100 dark:border-slate-700 flex flex-col gap-4 bg-white dark:bg-slate-800 sticky top-0 z-10">
                 <div className="flex justify-between items-center">
-                    <h3 className="font-bold text-lg text-slate-800">Appointment Requests</h3>
-                    <div className="flex bg-gray-100 p-1 rounded-lg">
+                    <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">Appointment Requests</h3>
+                    <div className="flex bg-gray-100 dark:bg-slate-700 p-1 rounded-lg">
                         <button
                             onClick={() => setDateFilter('today')}
-                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${dateFilter === 'today' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${dateFilter === 'today' ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                         >
                             Today
                         </button>
                         <button
                             onClick={() => setDateFilter('tomorrow')}
-                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${dateFilter === 'tomorrow' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${dateFilter === 'tomorrow' ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                         >
                             Tomorrow
                         </button>
                         <button
                             onClick={() => setDateFilter('all')}
-                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${dateFilter === 'all' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${dateFilter === 'all' ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                         >
                             All Time
                         </button>
@@ -113,7 +113,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
                             placeholder="Search patients..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all w-full"
+                            className="pl-9 pr-4 py-2 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all w-full"
                         />
                     </div>
 
@@ -123,13 +123,13 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
                                 type="date"
                                 value={customDate}
                                 onChange={(e) => setCustomDate(e.target.value)}
-                                className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+                                className="px-3 py-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
                             />
                         )}
                         {dateFilter !== 'custom' && (
                             <button
                                 onClick={() => setDateFilter('custom')}
-                                className="p-2 text-slate-500 hover:bg-gray-50 rounded-lg border border-transparent hover:border-gray-200 transition-all"
+                                className="p-2 text-slate-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-slate-600 transition-all"
                                 title="Select Date"
                             >
                                 <Calendar size={18} />
@@ -140,7 +140,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
                             <select
                                 value={filter}
                                 onChange={(e) => setFilter(e.target.value)}
-                                className="pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 appearance-none cursor-pointer"
+                                className="pl-3 pr-8 py-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 appearance-none cursor-pointer"
                             >
                                 <option value="all">All Status</option>
                                 <option value="pending">Pending</option>
@@ -167,12 +167,12 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
                         <p>Loading appointments...</p>
                     </div>
                 ) : filteredBookings.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full py-12 text-slate-400">
-                        <div className="bg-gray-50 p-6 rounded-full mb-4">
-                            <Calendar size={32} className="text-gray-300" />
+                    <div className="flex flex-col items-center justify-center h-full py-12 text-slate-400 dark:text-slate-500">
+                        <div className="bg-gray-50 dark:bg-slate-700 p-6 rounded-full mb-4">
+                            <Calendar size={32} className="text-gray-300 dark:text-slate-500" />
                         </div>
-                        <h4 className="text-slate-700 font-medium mb-1">No bookings found</h4>
-                        <p className="text-sm text-slate-400 mb-6 text-center max-w-xs">
+                        <h4 className="text-slate-700 dark:text-slate-300 font-medium mb-1">No bookings found</h4>
+                        <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 text-center max-w-xs">
                             {dateFilter === 'today'
                                 ? "No bookings scheduled for today."
                                 : dateFilter === 'tomorrow'
@@ -183,7 +183,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
                         <div className="flex gap-3">
                             <button
                                 onClick={copyBookingLink}
-                                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-gray-50 transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors"
                             >
                                 <Copy size={16} />
                                 Copy Link
@@ -196,53 +196,50 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
                     </div>
                 ) : (
                     <table className="w-full text-left border-collapse">
-                        <thead className="bg-gray-50/50 sticky top-0 z-0">
+                        <thead className="bg-gray-50/50 dark:bg-slate-700/50 sticky top-0 z-0">
                             <tr>
-                                <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Patient</th>
-                                <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Service</th>
-                                <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Provider</th>
-                                <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date & Time</th>
-                                <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                                <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Patient</th>
+                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Service</th>
+                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Provider</th>
+                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date & Time</th>
+                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
                             {filteredBookings.map((booking) => {
                                 const date = new Date(booking.start_time);
                                 return (
-                                    <tr key={booking.id} className="hover:bg-slate-50/80 transition-colors group">
+                                    <tr key={booking.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors group">
                                         <td className="p-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center text-xs font-bold">
+                                                <div className="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 flex items-center justify-center text-xs font-bold">
                                                     {booking.customer_name.charAt(0)}
                                                 </div>
                                                 <div>
-                                                    <div className="font-medium text-slate-900 text-sm">{booking.customer_name}</div>
-                                                    <div className="text-slate-400 text-xs">{booking.customer_email}</div>
+                                                    <div className="font-medium text-slate-900 dark:text-slate-100 text-sm">{booking.customer_name}</div>
+                                                    <div className="text-slate-400 dark:text-slate-500 text-xs">{booking.customer_email}</div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="p-4">
-                                            <span className="text-sm text-slate-600">{booking.service_name}</span>
+                                            <span className="text-sm text-slate-600 dark:text-slate-300">{booking.service_name}</span>
                                         </td>
                                         <td className="p-4">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-bold">
-                                                    {booking.doctor_name ? booking.doctor_name.charAt(4) : '?'}
+                                                <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 flex items-center justify-center text-[10px] font-bold">
+                                                    {booking.doctor_name ? booking.doctor_name.charAt(0) : '?'}
                                                 </div>
-                                                <span className="text-sm text-slate-700">{booking.doctor_name || 'Unassigned'}</span>
+                                                <span className="text-sm text-slate-700 dark:text-slate-300">{booking.doctor_name || 'Unassigned'}</span>
                                             </div>
                                         </td>
                                         <td className="p-4">
-                                            <div className="text-sm text-slate-900 font-medium">
-                                                {format(date, 'MMM d')}
-                                            </div>
-                                            <div className="text-xs text-slate-500">
-                                                {format(date, 'HH:mm')}
+                                            <div className="text-sm text-slate-900 dark:text-slate-100 font-medium">
+                                                {format(date, 'MMM d')} • {format(date, 'h:mm a')}
                                             </div>
                                         </td>
                                         <td className="p-4">
-                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(booking.status)}`}>
+                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${getStatusColor(booking.status)}`}>
                                                 {getStatusIcon(booking.status)}
                                                 {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                                             </span>
@@ -251,20 +248,20 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
                                             <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <button
                                                     onClick={() => onUpdateStatus(booking.id, 'confirmed')}
-                                                    className="p-1.5 text-green-600 hover:bg-green-50 rounded-md transition-colors"
+                                                    className="p-1.5 text-green-600 hover:text-white hover:bg-green-600 rounded-md transition-colors"
                                                     title="Confirm"
                                                 >
                                                     <Check size={16} />
                                                 </button>
                                                 <button
                                                     onClick={() => onUpdateStatus(booking.id, 'cancelled')}
-                                                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                                    className="p-1.5 text-red-600 hover:text-white hover:bg-red-600 rounded-md transition-colors"
                                                     title="Reject/Cancel"
                                                 >
                                                     <X size={16} />
                                                 </button>
                                                 <button
-                                                    className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-md transition-colors"
+                                                    className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-600 rounded-md transition-colors"
                                                     title="View Details"
                                                 >
                                                     <Eye size={16} />
