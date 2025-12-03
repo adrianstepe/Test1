@@ -42,7 +42,7 @@ const DashboardHome: React.FC = () => {
         created_at: b.created_at,
         customer_name: b.customer_name,
         customer_email: b.customer_email,
-        service_name: b.service?.name?.['EN'] || 'Unknown Service', // Default to EN or handle language
+        service_name: b.service_name,
         start_time: b.start_time,
         status: b.status,
         doctor_id: b.doctor_id,
