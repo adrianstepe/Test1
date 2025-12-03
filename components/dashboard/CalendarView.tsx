@@ -80,12 +80,12 @@ const CalendarView: React.FC<CalendarViewProps> = ({ bookings }) => {
                                         {slotBookings.map((booking, i) => (
                                             <div
                                                 key={booking.id}
-                                                className="absolute inset-x-1 top-1 bottom-1 bg-teal-100 dark:bg-teal-900/40 border border-teal-200 dark:border-teal-700/50 rounded-md p-1.5 overflow-hidden hover:z-10 hover:shadow-md transition-all cursor-pointer flex flex-col justify-center"
+                                                className="absolute inset-x-1 top-1 bottom-1 bg-teal-100 dark:bg-teal-600 border border-teal-200 dark:border-teal-500 rounded-md p-1.5 overflow-hidden hover:z-10 hover:shadow-md transition-all cursor-pointer flex flex-col justify-center"
                                                 style={{ top: `${i * 5}px`, left: `${i * 5}px`, right: `${5 - i * 5}px` }}
                                                 title={`${booking.customer_name} - ${booking.service_name} (${booking.duration || 30} min)`}
                                             >
-                                                <div className="text-[10px] font-bold text-teal-800 dark:text-teal-300 truncate">{booking.customer_name}</div>
-                                                <div className="text-[9px] text-teal-600 dark:text-teal-400 truncate">{booking.service_name}</div>
+                                                <div className="text-[10px] font-bold text-teal-800 dark:text-white truncate">{booking.customer_name}</div>
+                                                <div className="text-[9px] text-teal-600 dark:text-teal-100 truncate">{booking.service_name}</div>
                                             </div>
                                         ))}
                                     </div>

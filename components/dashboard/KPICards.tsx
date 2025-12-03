@@ -47,21 +47,21 @@ const KPICards: React.FC<KPICardsProps> = ({ stats }) => {
             {kpiData.map((stat, index) => {
                 const Icon = stat.icon;
                 return (
-                    <div key={index} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div key={index} className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md transition-all">
                         <div className="flex justify-between items-start">
                             <div>
-                                <p className="text-sm font-medium text-slate-500 mb-1">{stat.label}</p>
-                                <h3 className="text-2xl font-bold text-slate-800">{stat.value}</h3>
+                                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">{stat.label}</p>
+                                <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stat.value}</h3>
                             </div>
-                            <div className={`p-3 rounded-xl ${stat.color} bg-opacity-10`}>
-                                <Icon size={20} className={`text-${stat.color.replace('bg-', '')}`} />
+                            <div className={`p-3 rounded-xl ${stat.color} bg-opacity-10 dark:bg-opacity-20`}>
+                                <Icon size={20} className={`text-${stat.color.replace('bg-', '')} dark:text-${stat.color.replace('bg-', '')}-400`} />
                             </div>
                         </div>
                         <div className="mt-4 flex items-center gap-2">
                             {stat.trend === 'up' && <TrendingUp size={16} className="text-green-500" />}
                             {stat.trend === 'down' && <TrendingDown size={16} className="text-red-500" />}
-                            <span className={`text-xs font-medium ${stat.trend === 'up' ? 'text-green-600' :
-                                stat.trend === 'down' ? 'text-red-600' : 'text-slate-400'
+                            <span className={`text-xs font-medium ${stat.trend === 'up' ? 'text-green-600 dark:text-green-400' :
+                                stat.trend === 'down' ? 'text-red-600 dark:text-red-400' : 'text-slate-400 dark:text-slate-500'
                                 }`}>
                                 {stat.change}
                             </span>

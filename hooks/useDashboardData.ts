@@ -128,6 +128,8 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
 
                     // Filter out short names like "a a a" or "test"
                     if (name.length < 3) return false;
+                    // Check for repetitive single characters like "a a a"
+                    if (/^([a-z])\s+\1\s+\1/.test(name)) return false;
                     if (name.includes('test')) return false;
                     if (email.includes('test') || email.includes('example.com')) return false;
 
