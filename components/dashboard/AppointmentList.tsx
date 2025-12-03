@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, CheckCircle, XCircle, Clock, Calendar, Copy, UserPlus, Eye, Check, X } from 'lucide-react';
+import { Search, Filter, CheckCircle, XCircle, Clock, Calendar, Copy, UserPlus, Eye, Check, X, AlertCircle } from 'lucide-react';
 import { format, isSameDay, addDays, parseISO, isToday, isTomorrow } from 'date-fns';
 
 interface Booking {
@@ -17,12 +17,13 @@ interface Booking {
 interface AppointmentListProps {
     bookings: Booking[];
     loading: boolean;
+    error?: string | null;
     onUpdateStatus: (id: string, status: string) => void;
 }
 
 type DateFilterType = 'today' | 'tomorrow' | 'all' | 'custom';
 
-const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, onUpdateStatus }) => {
+const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, error, onUpdateStatus }) => {
     const [filter, setFilter] = useState('all');
     const [dateFilter, setDateFilter] = useState<DateFilterType>('today');
     const [customDate, setCustomDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -154,7 +155,13 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, on
             </div>
 
             <div className="overflow-y-auto flex-1">
-                {loading ? (
+                {error ? (
+                    <div className="flex flex-col items-center justify-center h-full text-red-500 p-8 text-center">
+                        <AlertCircle size={48} className="mb-4 opacity-50" />
+                        <h4 className="font-bold text-lg mb-2">Failed to load appointments</h4>
+                        <p className="text-sm text-slate-500 max-w-xs">{error}</p>
+                    </div>
+                ) : loading ? (
                     <div className="flex flex-col items-center justify-center h-64 text-slate-400">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mb-4"></div>
                         <p>Loading appointments...</p>

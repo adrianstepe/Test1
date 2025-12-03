@@ -12,7 +12,7 @@ const DashboardHome: React.FC = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     // Fetch data using our new hook
-    const { bookings, loading, stats, refresh } = useDashboardData({
+    const { bookings, loading, error, stats, refresh } = useDashboardData({
         doctorId: viewAs
     });
 
@@ -116,6 +116,7 @@ const DashboardHome: React.FC = () => {
                         <AppointmentList
                             bookings={mappedBookings}
                             loading={loading}
+                            error={error}
                             onUpdateStatus={updateStatus}
                         />
                     </div>

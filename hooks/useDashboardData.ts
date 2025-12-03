@@ -71,8 +71,10 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
                 `)
                 .order('start_time', { ascending: true });
 
-            // Filter by the logged-in doctor (user)
-            query = query.eq('doctor_id', user.id);
+            // Filter by the selected doctor if specified
+            if (doctorId && doctorId !== 'all') {
+                query = query.eq('doctor_id', doctorId);
+            }
 
             if (dateRange) {
                 query = query.gte('start_time', dateRange.start.toISOString())
