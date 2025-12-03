@@ -92,27 +92,69 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
 
             if (error) throw error;
 
-            // Map data to match the interface expected by components
-            const mappedData = (data as any[]).map(b => {
-                // Handle the joined 'services' object
-                const serviceData = Array.isArray(b.services) ? b.services[0] : b.services;
-                // Handle the joined 'doctor' object
-                const doctorData = Array.isArray(b.doctor) ? b.doctor[0] : b.doctor;
+            // Helper to parse localized names
+            const getLocalizedName = (nameData: any, lang: string = 'EN'): string => {
+                if (!nameData) return 'Unknown Service';
 
-                return {
-                    ...b,
-                    service_name: serviceData?.name || 'Unknown Service',
-                    doctor_name: doctorData?.full_name || 'Unassigned',
-                    service: serviceData ? {
-                        name: serviceData.name,
-                        price: serviceData.price_cents ? serviceData.price_cents / 100 : 0,
-                        durationMinutes: serviceData.duration_minutes || 30
-                    } : undefined,
-                    doctor: doctorData ? {
-                        full_name: doctorData.full_name
-                    } : undefined
-                };
-            });
+                try {
+                    // If it's already a string
+                    if (typeof nameData === 'string') {
+                        // Check if it looks like a JSON string
+                        if (nameData.trim().startsWith('{')) {
+                            const parsed = JSON.parse(nameData);
+                            return parsed[lang] || parsed['EN'] || Object.values(parsed)[0] as string || nameData;
+                        }
+                        return nameData;
+                    }
+
+                    // If it's an object
+                    if (typeof nameData === 'object') {
+                        return nameData[lang] || nameData['EN'] || Object.values(nameData)[0] as string || 'Unknown Service';
+                    }
+                } catch (e) {
+                    console.warn('Failed to parse service name:', nameData);
+                    return String(nameData);
+                }
+
+                return 'Unknown Service';
+            };
+
+            // Map data to match the interface expected by components
+            const mappedData = (data as any[])
+                .filter(b => {
+                    // Filter out invalid or test data
+                    const name = b.customer_name?.toLowerCase() || '';
+                    const email = b.customer_email?.toLowerCase() || '';
+
+                    // Filter out short names like "a a a" or "test"
+                    if (name.length < 3) return false;
+                    if (name.includes('test')) return false;
+                    if (email.includes('test') || email.includes('example.com')) return false;
+
+                    return true;
+                })
+                .map(b => {
+                    // Handle the joined 'services' object
+                    const serviceData = Array.isArray(b.services) ? b.services[0] : b.services;
+                    // Handle the joined 'doctor' object
+                    const doctorData = Array.isArray(b.doctor) ? b.doctor[0] : b.doctor;
+
+                    const serviceName = getLocalizedName(serviceData?.name);
+
+                    return {
+                        ...b,
+                        service_name: serviceName,
+                        doctor_name: doctorData?.full_name || 'Unassigned',
+                        service: serviceData ? {
+                            name: serviceName,
+                            price: serviceData.price_cents ? serviceData.price_cents / 100 : 0,
+                            durationMinutes: serviceData.duration_minutes || 30
+                        } : undefined,
+                        doctor: doctorData ? {
+                            full_name: doctorData.full_name
+                        } : undefined
+                    };
+                });
 
             setBookings(mappedData as DashboardBooking[]);
         } catch (err: any) {
