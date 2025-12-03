@@ -144,4 +144,5 @@ export const TEXTS: Translations = {
   reservationFeeDesc1: { [Language.EN]: 'This is a security deposit, not an extra charge.', [Language.LV]: 'Tā ir vizītes drošības iemaksa, nevis papildu maksa.', [Language.RU]: 'Это залог, а не дополнительная плата.' },
   reservationFeeDesc2: { [Language.EN]: 'If you attend your appointment, the 30 € is deducted from the total price.', [Language.LV]: 'Ja ierodies uz vizīti, 30 € tiek atskaitīti no pakalpojuma kopējās cenas.', [Language.RU]: 'Если вы придете на прием, 30 € будет вычтено из общей стоимости.' },
   reservationFeeDesc3: { [Language.EN]: 'If you do not attend or cancel less than 24 hours before, the clinic keeps the 30 € as a no-show fee.', [Language.LV]: 'Ja uz vizīti neierodies vai atcel, mazāk nekā 24 h pirms vizītes, klīnika patur 30 € kā neierašanās maksu.', [Language.RU]: 'Если вы не придете или отмените менее чем за 24 часа, клиника удержит 30 € в качестве штрафа за неявку.' },
+  calendarAdded: { [Language.EN]: 'Added to Calendar', [Language.LV]: 'Pievienots kalendāram', [Language.RU]: 'Добавлено в календарь' },
 };

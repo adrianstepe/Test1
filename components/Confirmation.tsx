@@ -60,7 +60,7 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
       });
 
       if (response.ok) {
-        alert(TEXTS.successMsg[language] || "Added to Calendar!");
+        alert(TEXTS.calendarAdded[language] || "Added to Calendar!");
       } else {
         console.error("Failed to sync calendar");
       }
@@ -81,21 +81,21 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
 
       <div className="bg-gray-50 dark:bg-slate-800 p-6 rounded-xl border border-gray-100 dark:border-slate-700 max-w-sm mx-auto text-left mb-8">
         <div className="space-y-3">
-          <div className="flex justify-between">
-            <span className="text-gray-500 dark:text-gray-400 text-sm">Service</span>
-            <span className="font-medium text-gray-900 dark:text-white">{booking.selectedService?.name[language]}</span>
+          <div className="flex justify-between gap-4">
+            <span className="text-gray-500 dark:text-gray-400 text-sm">{TEXTS.stepService[language]}</span>
+            <span className="font-medium text-gray-900 dark:text-white text-right">{booking.selectedService?.name[language]}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500 dark:text-gray-400 text-sm">Specialist</span>
-            <span className="font-medium text-gray-900 dark:text-white">{booking.selectedSpecialist?.name || 'Any'}</span>
+          <div className="flex justify-between gap-4">
+            <span className="text-gray-500 dark:text-gray-400 text-sm">{TEXTS.selectSpecialist[language]}</span>
+            <span className="font-medium text-gray-900 dark:text-white text-right">{booking.selectedSpecialist?.name || TEXTS.anySpecialist[language]}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500 dark:text-gray-400 text-sm">Date</span>
-            <span className="font-medium text-gray-900 dark:text-white">{booking.selectedDate?.toLocaleDateString()}</span>
+          <div className="flex justify-between gap-4">
+            <span className="text-gray-500 dark:text-gray-400 text-sm">{TEXTS.stepDate[language]}</span>
+            <span className="font-medium text-gray-900 dark:text-white text-right">{booking.selectedDate?.toLocaleDateString()}</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-4">
             <span className="text-gray-500 dark:text-gray-400 text-sm">Time</span>
-            <span className="font-medium text-gray-900 dark:text-white">{booking.selectedTime}</span>
+            <span className="font-medium text-gray-900 dark:text-white text-right">{booking.selectedTime}</span>
           </div>
         </div>
       </div>
