@@ -3,13 +3,22 @@ import { supabase } from '@/supabaseClient';
 import KPICards from './KPICards';
 import AppointmentList from './AppointmentList';
 import CalendarView from './CalendarView';
-import { Bell, ChevronDown, Check, Sun, Moon } from 'lucide-react';
+import { Bell, ChevronDown, Check, Sun, Moon, LogOut } from 'lucide-react';
 import { SPECIALISTS } from '../../constants';
 import { useDashboardData } from '../../hooks/useDashboardData';
+import { useUser } from '../../contexts/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 const DashboardHome: React.FC = () => {
     const [viewAs, setViewAs] = useState<string>('all'); // 'all' or doctor_id
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const { signOut } = useUser();
+    const navigate = useNavigate();
+
+    const handleSignOut = async () => {
+        await signOut();
+        navigate('/login');
+    };
 
     // Fetch data using our new hook
     const { bookings, loading, error, stats, refresh } = useDashboardData({
@@ -116,6 +125,14 @@ const DashboardHome: React.FC = () => {
                         title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
                     >
                         {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                    </button>
+
+                    <button
+                        onClick={handleSignOut}
+                        className="p-2 text-red-500 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                        title="Sign Out"
+                    >
+                        <LogOut size={20} />
                     </button>
                 </div>
             </header>
