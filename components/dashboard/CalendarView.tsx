@@ -9,6 +9,7 @@ interface Booking {
     service_name: string;
     doctor_id?: string;
     doctor_name?: string;
+    duration?: number;
 }
 
 interface CalendarViewProps {
@@ -79,8 +80,9 @@ const CalendarView: React.FC<CalendarViewProps> = ({ bookings }) => {
                                         {slotBookings.map((booking, i) => (
                                             <div
                                                 key={booking.id}
-                                                className="absolute inset-x-1 top-1 bottom-1 bg-teal-100 border border-teal-200 rounded-md p-1.5 overflow-hidden hover:z-10 hover:shadow-md transition-all cursor-pointer"
+                                                className="absolute inset-x-1 top-1 bottom-1 bg-teal-100 border border-teal-200 rounded-md p-1.5 overflow-hidden hover:z-10 hover:shadow-md transition-all cursor-pointer flex flex-col justify-center"
                                                 style={{ top: `${i * 5}px`, left: `${i * 5}px`, right: `${5 - i * 5}px` }}
+                                                title={`${booking.customer_name} - ${booking.service_name} (${booking.duration || 30} min)`}
                                             >
                                                 <div className="text-[10px] font-bold text-teal-800 truncate">{booking.customer_name}</div>
                                                 <div className="text-[9px] text-teal-600 truncate">{booking.service_name}</div>

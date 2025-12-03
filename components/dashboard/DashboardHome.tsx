@@ -3,7 +3,7 @@ import { supabase } from '@/supabaseClient';
 import KPICards from './KPICards';
 import AppointmentList from './AppointmentList';
 import CalendarView from './CalendarView';
-import { Bell, ChevronDown, Check } from 'lucide-react';
+import { Bell, ChevronDown, Check, Sun, Moon } from 'lucide-react';
 import { SPECIALISTS } from '../../constants';
 import { useDashboardData } from '../../hooks/useDashboardData';
 
@@ -46,16 +46,29 @@ const DashboardHome: React.FC = () => {
         start_time: b.start_time,
         status: b.status,
         doctor_id: b.doctor_id,
-        doctor_name: b.doctor?.full_name || 'Unassigned'
+        doctor_name: b.doctor?.full_name || 'Unassigned',
+        duration: b.service?.durationMinutes
     }));
 
+    const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+    const toggleTheme = () => {
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+        if (newTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    };
+
     return (
-        <div className="flex-1 bg-gray-50 min-h-screen ml-64">
+        <div className="flex-1 bg-gray-50 min-h-screen w-full">
             {/* Header */}
             <header className="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center sticky top-0 z-20">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
-                    <p className="text-sm text-slate-500">Welcome back, Dr. Butkeviča</p>
+                    <p className="text-sm text-slate-500">Doctor Focus Mode</p>
                 </div>
 
                 <div className="flex items-center gap-6">
@@ -97,14 +110,13 @@ const DashboardHome: React.FC = () => {
                         )}
                     </div>
 
-                    <button className="relative p-2 text-slate-400 hover:text-slate-600 transition-colors">
-                        <Bell size={20} />
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                    <button
+                        onClick={toggleTheme}
+                        className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-lg hover:bg-gray-100"
+                        title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                    >
+                        {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
                     </button>
-
-                    <div className="w-10 h-10 rounded-full bg-teal-100 border-2 border-white shadow-sm overflow-hidden">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Avatar" />
-                    </div>
                 </div>
             </header>
 

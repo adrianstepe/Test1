@@ -19,6 +19,7 @@ export interface DashboardBooking {
     services?: {
         name: any; // JSONB
         price_cents: number;
+        duration?: number;
     };
     // Keep these for backward compatibility if needed, or map them from 'services'
     service?: {
@@ -66,7 +67,8 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
                     *,
                     services (
                         name,
-                        price_cents
+                        price_cents,
+                        duration
                     )
                 `)
                 .order('start_time', { ascending: true });
@@ -98,7 +100,7 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
                     service: serviceData ? {
                         name: serviceData.name,
                         price: serviceData.price_cents ? serviceData.price_cents / 100 : 0,
-                        durationMinutes: 30 // Default or fetch if added to DB
+                        durationMinutes: serviceData.duration || 30
                     } : undefined
                 };
             });
