@@ -22,12 +22,29 @@ const AdminDashboard: React.FC = () => {
     const fetchBookings = async () => {
         try {
             setLoading(true);
+
+            // Debug: Check current user
+            const { data: { user } } = await supabase.auth.getUser();
+            console.log("Current User:", user);
+
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+                console.log("User Profile Role:", profile?.role);
+            }
+
             const { data, error } = await supabase
                 .from('bookings')
                 .select('*')
                 .order('start_time', { ascending: true });
 
-            if (error) throw error;
+            if (error) {
+                console.error("Supabase Error:", error);
+                throw error;
+            }
             setBookings(data || []);
         } catch (error) {
             console.error('Error fetching bookings:', error);
