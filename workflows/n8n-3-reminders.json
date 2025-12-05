@@ -1,0 +1,208 @@
+{
+    "name": "Reminders (Daily 9AM - Multi-language)",
+    "nodes": [
+        {
+            "parameters": {},
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                0,
+                200
+            ],
+            "id": "manual-trigger"
+        },
+        {
+            "parameters": {
+                "triggerTimes": {
+                    "item": [
+                        {
+                            "mode": "everyDay",
+                            "hour": 9
+                        }
+                    ]
+                }
+            },
+            "name": "Cron (Daily 9AM)",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "cron-daily-9am"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT * FROM bookings \nWHERE status = 'booked' \nAND start_time::date = CURRENT_DATE + INTERVAL '1 day';",
+                "additionalFields": {}
+            },
+            "name": "Fetch Tomorrow's Bookings",
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                200,
+                0
+            ],
+            "id": "fetch-tomorrow",
+            "credentials": {
+                "postgres": {
+                    "id": "6DfCu5DXBg8c1OZ2",
+                    "name": "Postgres account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "batchSize": 1,
+                "options": {}
+            },
+            "name": "Split Batches",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "split-batches"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Multi-language Logic (Phone-based)\nconst booking = $input.first().json;\nconst phone = (booking.phone || '').replace(/\\D/g, ''); // Remove non-digits\nconst name = booking.customer_name || 'Patient';\nconst time = booking.start_time;\n\n// Language Rule: Default to Latvian. Only switch to English if phone is foreign.\n// Latvian phones start with 371 or are 8 digits long (local format).\nconst isLatvian = !phone || phone.startsWith('371') || phone.length === 8;\nconst lang = isLatvian ? 'lv' : 'en';\n\nlet emailSubject, emailBody, smsMessage;\n\n// --- LATVIAN (Default) ---\nif (lang === 'lv') {\n  emailSubject = 'Atgādinājums par vizīti - Butkeviča Dental';\n  emailBody = `Cien. ${name},\\n\\nŠis ir oficiāls atgādinājums par Jūsu zobārstniecības vizīti, kas ieplānota rīt plkst. ${time}.\\n\\nLūdzu, ierodieties laikus. Ja nepieciešams pārcelt vizīti, lūdzu, sazinieties ar mums nekavējoties.\\n\\nAr cieņu,\\nButkeviča Dental Practice`;\n  smsMessage = `Atgādinājums: Zobārsta vizīte rīt plkst. ${time}. Uz tikšanos! - Butkeviča Dental`;\n}\n\n// --- ENGLISH (Foreign Phones) ---\nelse {\n  emailSubject = 'Appointment Reminder - Butkeviča Dental';\n  emailBody = `Dear ${name},\\n\\nThis is a formal reminder regarding your dental appointment scheduled for tomorrow at ${time}.\\n\\nPlease ensure you arrive on time. If you need to reschedule, kindly contact us immediately.\\n\\nSincerely,\\nButkeviča Dental Practice`;\n  smsMessage = `Reminder: Dental appointment tomorrow at ${time}. See you soon! - Butkeviča Dental`;\n}\n\nreturn {\n  json: {\n    ...booking,\n    email_subject: emailSubject,\n    email_body: emailBody,\n    sms_message: smsMessage\n  }\n};"
+            },
+            "name": "Language Logic",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                600,
+                0
+            ],
+            "id": "language-logic"
+        },
+        {
+            "parameters": {
+                "sendTo": "={{$json.customer_email}}",
+                "subject": "={{$json.email_subject}}",
+                "message": "={{$json.email_body}}",
+                "options": {}
+            },
+            "name": "Send Email (Gmail)",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                800,
+                0
+            ],
+            "id": "send-email",
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "YOUR_GMAIL_CREDENTIAL_ID",
+                    "name": "Gmail account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "sms",
+                "operation": "send",
+                "from": "+1234567890",
+                "to": "={{$json.phone}}",
+                "message": "={{$json.sms_message}}"
+            },
+            "name": "Send SMS (Twilio)",
+            "type": "n8n-nodes-base.twilio",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                0
+            ],
+            "id": "send-sms",
+            "credentials": {
+                "twilioApi": {
+                    "id": "YOUR_TWILIO_CREDENTIAL_ID",
+                    "name": "Twilio account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Fetch Tomorrow's Bookings",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Cron (Daily 9AM)": {
+            "main": [
+                [
+                    {
+                        "node": "Fetch Tomorrow's Bookings",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fetch Tomorrow's Bookings": {
+            "main": [
+                [
+                    {
+                        "node": "Split Batches",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Split Batches": {
+            "main": [
+                [
+                    {
+                        "node": "Language Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Language Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Send Email (Gmail)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Email (Gmail)": {
+            "main": [
+                [
+                    {
+                        "node": "Send SMS (Twilio)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send SMS (Twilio)": {
+            "main": [
+                [
+                    {
+                        "node": "Split Batches",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

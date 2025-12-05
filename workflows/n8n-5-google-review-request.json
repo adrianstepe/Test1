@@ -1,0 +1,153 @@
+{
+    "name": "Google Review Request (3h Post-Appointment)",
+    "nodes": [
+        {
+            "parameters": {
+                "triggerTimes": {
+                    "item": [
+                        {
+                            "mode": "everyX",
+                            "value": 30,
+                            "unit": "minutes"
+                        }
+                    ]
+                }
+            },
+            "name": "Cron (Every 30m)",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "cron-trigger"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT * FROM bookings \nWHERE status = 'confirmed' \nAND end_time >= NOW() - INTERVAL '3 hours 30 minutes' \nAND end_time < NOW() - INTERVAL '3 hours';",
+                "additionalFields": {}
+            },
+            "name": "Fetch Recent Appointments",
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                200,
+                0
+            ],
+            "id": "fetch-recent",
+            "credentials": {
+                "postgres": {
+                    "id": "GuG495s0j2amZHOv",
+                    "name": "Postgres account 2"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "batchSize": 1,
+                "options": {}
+            },
+            "name": "Split Batches",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "split-batches"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Multi-language Logic for Google Review Request\nconst booking = $input.first().json;\nconst phone = (booking.phone || '').replace(/\\D/g, ''); // Remove non-digits\nconst name = booking.customer_name || 'Patient';\n\n// Language Rule: Default to Latvian. Only switch to English if phone is foreign.\n// Latvian phones start with 371 or are 8 digits long (local format).\nconst isLatvian = !phone || phone.startsWith('371') || phone.length === 8;\nconst lang = isLatvian ? 'lv' : 'en';\n\nconst reviewLink = 'https://search.google.com/local/writereview?placeid=ChIJPT-F_87P7kYRZvLaa9hzpn0';\n\nlet emailSubject, emailBody;\n\n// --- LATVIAN (Default) ---\nif (lang === 'lv') {\n  emailSubject = `Labdien, ${name}!`;\n  emailBody = `Labdien, ${name}!\n\nPaldies, ka šodien uzticējāt savu smaidu Dr. Butkevičas klīnikai.\n\nMēs šobrīd aktīvi strādājam pie tā, lai nodrošinātu visaugstāko servisa līmeni katram pacientam, tāpēc Jūsu viedoklis mums ir ļoti svarīgs.\n\n🌟 **Ja esat apmierināts ar vizīti:**\nBūsim no sirds pateicīgi, ja veltīsiet brīdi, lai atstātu atsauksmi Google. Tas mums ļoti palīdz:\n${reviewLink}\n\n💬 **Ja ir kas tāds, ko mēs varētu darīt labāk:**\nMēs vēlamies augt un mācīties. Ja kaut kas Jūs neapmierināja vai palika neskaidrs, lūdzu, atbildiet uz šo e-pastu un pastāstiet mums. Mēs to noteikti ņemsim vērā un centīsimies situāciju atrisināt.\n\nAr cieņu,\nDr. Butkevičas prakses komanda`;\n}\n\n// --- ENGLISH (Foreign Phones) ---\nelse {\n  emailSubject = `Hello, ${name}!`;\n  emailBody = `Hello, ${name}!\n\nThank you for trusting your smile to Dr. Butkeviča's Clinic today.\n\nWe are actively working to ensure the highest level of service for every patient, so your feedback is very important to us.\n\n🌟 **If you are happy with your visit:**\nWe would be truly grateful if you could take a moment to leave a review on Google. It helps us a lot:\n${reviewLink}\n\n💬 **If there is anything we could do better:**\nWe want to grow and learn. If anything was not up to your expectations or remained unclear, please reply to this email and tell us. We will definitely take it into account and try to resolve the situation.\n\nSincerely,\nDr. Butkeviča Practice Team`;\n}\n\nreturn {\n  json: {\n    ...booking,\n    email_subject: emailSubject,\n    email_body: emailBody\n  }\n};"
+            },
+            "name": "Language Logic",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                600,
+                0
+            ],
+            "id": "language-logic"
+        },
+        {
+            "parameters": {
+                "sendTo": "={{$json.customer_email}}",
+                "subject": "={{$json.email_subject}}",
+                "message": "={{$json.email_body}}",
+                "options": {}
+            },
+            "name": "Send Email (Gmail)",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                800,
+                0
+            ],
+            "id": "send-email",
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "bsHsQyITlAn3DBQk",
+                    "name": "Gmail account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Cron (Every 30m)": {
+            "main": [
+                [
+                    {
+                        "node": "Fetch Recent Appointments",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fetch Recent Appointments": {
+            "main": [
+                [
+                    {
+                        "node": "Split Batches",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Split Batches": {
+            "main": [
+                [
+                    {
+                        "node": "Language Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Language Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Send Email (Gmail)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Email (Gmail)": {
+            "main": [
+                [
+                    {
+                        "node": "Split Batches",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
