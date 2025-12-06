@@ -11,12 +11,20 @@ WITH last_appointments AS (
   SELECT 
     b.customer_email,
     b.customer_name,
-    COALESCE(b.language, 'lv') AS language_preference,
+    b.phone,
+    -- Derive language from phone number: +371 or 8-digit local = Latvian, else English
+    CASE 
+      WHEN b.phone IS NULL OR b.phone = '' THEN 'lv'
+      WHEN b.phone LIKE '+371%' THEN 'lv'
+      WHEN b.phone LIKE '371%' THEN 'lv'
+      WHEN LENGTH(REGEXP_REPLACE(b.phone, '[^0-9]', '', 'g')) = 8 THEN 'lv'
+      ELSE 'en'
+    END AS language_preference,
     MAX(b.start_time) AS last_appointment_date
   FROM bookings b
   WHERE b.status IN ('completed', 'confirmed')
     AND b.start_time < NOW()
-  GROUP BY b.customer_email, b.customer_name, b.language
+  GROUP BY b.customer_email, b.customer_name, b.phone
 ),
 patients_with_future_appointments AS (
   -- Find patients who already have future appointments
