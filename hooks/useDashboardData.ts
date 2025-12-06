@@ -49,17 +49,29 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
     const fetchBookings = async () => {
         try {
             setLoading(true);
+            setError(null);
 
             // Get current user
             const { data: { user } } = await supabase.auth.getUser();
 
+            console.log('[Dashboard] Fetching bookings...');
+            console.log('[Dashboard] Current User:', user?.id, user?.email);
+
             if (!user) {
-                console.log('No authenticated user found');
+                console.log('[Dashboard] No authenticated user found');
+                setError('Please log in to view bookings');
                 setLoading(false);
                 return;
             }
 
-            console.log('Current User ID:', user.id);
+            // Check user's role
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('role, full_name')
+                .eq('id', user.id)
+                .single();
+
+            console.log('[Dashboard] User Profile:', profile, 'Profile Error:', profileError);
 
             let query = supabase
                 .from('bookings')
@@ -88,9 +100,21 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
 
             const { data, error } = await query;
 
-            console.log('Raw Data:', data, 'Error:', error);
+            console.log('[Dashboard] Query Result - Data count:', data?.length || 0);
+            console.log('[Dashboard] Query Result - Error:', error);
+            console.log('[Dashboard] Raw Data:', JSON.stringify(data, null, 2));
 
-            if (error) throw error;
+            if (error) {
+                console.error('[Dashboard] Query Error:', error.message, error.hint, error.details);
+                throw error;
+            }
+
+            if (!data || data.length === 0) {
+                console.log('[Dashboard] No bookings found in database');
+                setBookings([]);
+                setLoading(false);
+                return;
+            }
 
             // Helper to parse localized names
             const getLocalizedName = (nameData: any, lang: string = 'EN'): string => {
@@ -120,47 +144,34 @@ export const useDashboardData = ({ dateRange, doctorId }: UseDashboardDataProps)
             };
 
             // Map data to match the interface expected by components
-            const mappedData = (data as any[])
-                .filter(b => {
-                    // Filter out invalid or test data
-                    const name = b.customer_name?.toLowerCase() || '';
-                    const email = b.customer_email?.toLowerCase() || '';
+            // REMOVED: Aggressive test data filtering - show ALL bookings
+            const mappedData = (data as any[]).map(b => {
+                // Handle the joined 'services' object
+                const serviceData = Array.isArray(b.services) ? b.services[0] : b.services;
+                // Handle the joined 'doctor' object
+                const doctorData = Array.isArray(b.doctor) ? b.doctor[0] : b.doctor;
 
-                    // Filter out short names like "a a a" or "test"
-                    if (name.length < 3) return false;
-                    // Check for repetitive single characters like "a a a"
-                    if (/^([a-z])\s+\1\s+\1/.test(name)) return false;
-                    if (name.includes('test')) return false;
-                    if (email.includes('test') || email.includes('example.com')) return false;
+                const serviceName = b.service_name || getLocalizedName(serviceData?.name);
 
-                    return true;
-                })
-                .map(b => {
-                    // Handle the joined 'services' object
-                    const serviceData = Array.isArray(b.services) ? b.services[0] : b.services;
-                    // Handle the joined 'doctor' object
-                    const doctorData = Array.isArray(b.doctor) ? b.doctor[0] : b.doctor;
+                return {
+                    ...b,
+                    service_name: serviceName,
+                    doctor_name: doctorData?.full_name || 'Nav norādīts',
+                    service: serviceData ? {
+                        name: serviceName,
+                        price: serviceData.price_cents ? serviceData.price_cents / 100 : 0,
+                        durationMinutes: serviceData.duration_minutes || 30
+                    } : undefined,
+                    doctor: doctorData ? {
+                        full_name: doctorData.full_name
+                    } : undefined
+                };
+            });
 
-                    const serviceName = getLocalizedName(serviceData?.name);
-
-                    return {
-                        ...b,
-                        service_name: serviceName,
-                        doctor_name: doctorData?.full_name || 'Unassigned',
-                        service: serviceData ? {
-                            name: serviceName,
-                            price: serviceData.price_cents ? serviceData.price_cents / 100 : 0,
-                            durationMinutes: serviceData.duration_minutes || 30
-                        } : undefined,
-                        doctor: doctorData ? {
-                            full_name: doctorData.full_name
-                        } : undefined
-                    };
-                });
-
+            console.log('[Dashboard] Mapped Bookings:', mappedData.length, 'bookings');
             setBookings(mappedData as DashboardBooking[]);
         } catch (err: any) {
-            console.error('Error fetching dashboard data:', err);
+            console.error('[Dashboard] Error fetching dashboard data:', err);
             setError(err.message);
         } finally {
             setLoading(false);

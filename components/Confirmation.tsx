@@ -9,16 +9,46 @@ interface ConfirmationProps {
 }
 
 const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
-  const [saveStatus, setSaveStatus] = React.useState<'pending' | 'saved' | 'error'>('pending');
+  const [saveStatus, setSaveStatus] = React.useState<'pending' | 'saving' | 'saved' | 'error'>('pending');
+  const [saveError, setSaveError] = React.useState<string | null>(null);
+  const hasSaved = React.useRef(false);
 
   // Save booking to Supabase when confirmation page loads
   React.useEffect(() => {
     const saveBooking = async () => {
-      if (!booking.selectedDate || !booking.selectedTime || !booking.selectedService) {
-        console.error('[Confirmation] Missing booking data, cannot save');
-        setSaveStatus('error');
+      // Prevent double saves
+      if (hasSaved.current) {
+        console.log('[Confirmation] Already saved, skipping');
         return;
       }
+
+      console.log('[Confirmation] Checking booking data...');
+      console.log('[Confirmation] selectedDate:', booking.selectedDate);
+      console.log('[Confirmation] selectedTime:', booking.selectedTime);
+      console.log('[Confirmation] selectedService:', booking.selectedService);
+      console.log('[Confirmation] patientData:', booking.patientData);
+
+      if (!booking.selectedDate || !booking.selectedTime || !booking.selectedService) {
+        console.error('[Confirmation] Missing booking data, cannot save');
+        console.error('[Confirmation] Missing:', {
+          date: !booking.selectedDate,
+          time: !booking.selectedTime,
+          service: !booking.selectedService
+        });
+        setSaveStatus('error');
+        setSaveError('Missing booking data. Please start over.');
+        return;
+      }
+
+      if (!booking.patientData.email || !booking.patientData.firstName) {
+        console.error('[Confirmation] Missing patient data');
+        setSaveStatus('error');
+        setSaveError('Missing patient information. Please start over.');
+        return;
+      }
+
+      setSaveStatus('saving');
+      hasSaved.current = true;
 
       // Calculate start and end times
       const [hours, minutes] = booking.selectedTime.split(':').map(Number);
@@ -44,21 +74,29 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
         status: 'confirmed',
       };
 
-      console.log('[Confirmation] Saving booking to Supabase:', bookingData);
+      console.log('[Confirmation] Saving booking to Supabase:', JSON.stringify(bookingData, null, 2));
 
       const result = await saveBookingToSupabase(bookingData);
 
       if (result.success) {
-        console.log('[Confirmation] Booking saved successfully:', result.id);
+        console.log('[Confirmation] ✅ Booking saved successfully:', result.id);
         setSaveStatus('saved');
+        // Clear localStorage after successful save
+        localStorage.removeItem('butkevicaBookingState');
       } else {
-        console.error('[Confirmation] Failed to save booking:', result.error);
+        console.error('[Confirmation] ❌ Failed to save booking:', result.error);
         setSaveStatus('error');
+        setSaveError(result.error || 'Unknown error');
       }
     };
 
-    saveBooking();
-  }, []); // Run once on mount
+    // Only run if booking data is present
+    if (booking.selectedDate && booking.selectedTime && booking.selectedService) {
+      saveBooking();
+    } else {
+      console.log('[Confirmation] Waiting for booking data...');
+    }
+  }, [booking.selectedDate, booking.selectedTime, booking.selectedService, booking.patientData, language]);
 
   const getEventDetails = () => {
     if (!booking.selectedDate || !booking.selectedTime || !booking.selectedService) return null;
@@ -128,7 +166,27 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
         ✓
       </div>
       <h2 className="text-2xl font-bold text-secondary dark:text-white mb-2">{TEXTS.successTitle[language]}</h2>
-      <p className="text-gray-500 dark:text-gray-400 mb-8">{TEXTS.successMsg[language]}</p>
+      <p className="text-gray-500 dark:text-gray-400 mb-4">{TEXTS.successMsg[language]}</p>
+
+      {/* Save Status Indicator */}
+      <div className="mb-6">
+        {saveStatus === 'pending' && (
+          <span className="text-yellow-600 text-sm">⏳ Sagatavojas...</span>
+        )}
+        {saveStatus === 'saving' && (
+          <span className="text-blue-600 text-sm">💾 Saglabā pierakstu...</span>
+        )}
+        {saveStatus === 'saved' && (
+          <span className="text-green-600 text-sm">✅ Pieraksts saglabāts!</span>
+        )}
+        {saveStatus === 'error' && (
+          <div className="text-red-600 text-sm">
+            ❌ Kļūda saglabājot: {saveError}
+            <br />
+            <span className="text-xs text-gray-500">Pārbaudiet konsoli (F12) kļūdu detaļām</span>
+          </div>
+        )}
+      </div>
 
       <div className="bg-gray-50 dark:bg-slate-800 p-6 rounded-xl border border-gray-100 dark:border-slate-700 max-w-sm mx-auto text-left mb-8">
         <div className="space-y-3">
