@@ -1,7 +1,8 @@
 import React from 'react';
 import { Language, BookingState } from '../types';
 import { TEXTS } from '../constants';
-import { saveBookingToSupabase } from '../services/bookingService';
+// REMOVED: saveBookingToSupabase import - n8n webhook is now the single source of truth
+// This fixes the dual-write race condition that could cause duplicate entries
 
 interface ConfirmationProps {
   language: Language;
@@ -9,94 +10,21 @@ interface ConfirmationProps {
 }
 
 const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
-  const [saveStatus, setSaveStatus] = React.useState<'pending' | 'saving' | 'saved' | 'error'>('pending');
-  const [saveError, setSaveError] = React.useState<string | null>(null);
-  const hasSaved = React.useRef(false);
+  // ARCHITECTURE NOTE:
+  // The frontend does NOT write to the database anymore.
+  // The Stripe webhook -> n8n workflow is the single source of truth.
+  // This prevents:
+  //   1. Duplicate entries (if both frontend and webhook succeed)
+  //   2. Orphaned records (if frontend succeeds but webhook fails - no email/calendar)
+  // 
+  // The webhook.js correctly returns 502 if n8n fails, so Stripe will retry for 72h.
 
-  // Save booking to Supabase when confirmation page loads
   React.useEffect(() => {
-    const saveBooking = async () => {
-      // Prevent double saves
-      if (hasSaved.current) {
-        console.log('[Confirmation] Already saved, skipping');
-        return;
-      }
-
-      console.log('[Confirmation] Checking booking data...');
-      console.log('[Confirmation] selectedDate:', booking.selectedDate);
-      console.log('[Confirmation] selectedTime:', booking.selectedTime);
-      console.log('[Confirmation] selectedService:', booking.selectedService);
-      console.log('[Confirmation] patientData:', booking.patientData);
-
-      if (!booking.selectedDate || !booking.selectedTime || !booking.selectedService) {
-        console.error('[Confirmation] Missing booking data, cannot save');
-        console.error('[Confirmation] Missing:', {
-          date: !booking.selectedDate,
-          time: !booking.selectedTime,
-          service: !booking.selectedService
-        });
-        setSaveStatus('error');
-        setSaveError('Missing booking data. Please start over.');
-        return;
-      }
-
-      if (!booking.patientData.email || !booking.patientData.firstName) {
-        console.error('[Confirmation] Missing patient data');
-        setSaveStatus('error');
-        setSaveError('Missing patient information. Please start over.');
-        return;
-      }
-
-      setSaveStatus('saving');
-      hasSaved.current = true;
-
-      // Calculate start and end times
-      const [hours, minutes] = booking.selectedTime.split(':').map(Number);
-      const startDate = new Date(booking.selectedDate);
-      startDate.setHours(hours, minutes, 0, 0);
-
-      const endDate = new Date(startDate);
-      endDate.setMinutes(startDate.getMinutes() + (booking.selectedService.durationMinutes || 60));
-
-      // Prepare booking data
-      const bookingData = {
-        customer_name: `${booking.patientData.firstName} ${booking.patientData.lastName}`,
-        customer_email: booking.patientData.email,
-        phone: booking.patientData.phone,
-        service_id: booking.selectedService.id,
-        service_name: booking.selectedService.name[language] || booking.selectedService.name.EN,
-        start_time: startDate.toISOString(),
-        end_time: endDate.toISOString(),
-        doctor_id: booking.selectedSpecialist?.id,
-        doctor_name: booking.selectedSpecialist?.name,
-        language: language,
-        amount_paid: 30, // Deposit amount
-        status: 'confirmed',
-      };
-
-      console.log('[Confirmation] Saving booking to Supabase:', JSON.stringify(bookingData, null, 2));
-
-      const result = await saveBookingToSupabase(bookingData);
-
-      if (result.success) {
-        console.log('[Confirmation] ✅ Booking saved successfully:', result.id);
-        setSaveStatus('saved');
-        // Clear localStorage after successful save
-        localStorage.removeItem('butkevicaBookingState');
-      } else {
-        console.error('[Confirmation] ❌ Failed to save booking:', result.error);
-        setSaveStatus('error');
-        setSaveError(result.error || 'Unknown error');
-      }
-    };
-
-    // Only run if booking data is present
-    if (booking.selectedDate && booking.selectedTime && booking.selectedService) {
-      saveBooking();
-    } else {
-      console.log('[Confirmation] Waiting for booking data...');
-    }
-  }, [booking.selectedDate, booking.selectedTime, booking.selectedService, booking.patientData, language]);
+    // Clear localStorage booking state after successful payment redirect
+    // The booking is now handled entirely by the Stripe webhook -> n8n flow
+    console.log('[Confirmation] Payment successful - booking will be saved via Stripe webhook -> n8n');
+    localStorage.removeItem('butkevicaBookingState');
+  }, []);
 
   const getEventDetails = () => {
     if (!booking.selectedDate || !booking.selectedTime || !booking.selectedService) return null;
@@ -168,24 +96,9 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
       <h2 className="text-2xl font-bold text-secondary dark:text-white mb-2">{TEXTS.successTitle[language]}</h2>
       <p className="text-gray-500 dark:text-gray-400 mb-4">{TEXTS.successMsg[language]}</p>
 
-      {/* Save Status Indicator */}
+      {/* Booking confirmation message - data saved via Stripe webhook -> n8n */}
       <div className="mb-6">
-        {saveStatus === 'pending' && (
-          <span className="text-yellow-600 text-sm">⏳ Sagatavojas...</span>
-        )}
-        {saveStatus === 'saving' && (
-          <span className="text-blue-600 text-sm">💾 Saglabā pierakstu...</span>
-        )}
-        {saveStatus === 'saved' && (
-          <span className="text-green-600 text-sm">✅ Pieraksts saglabāts!</span>
-        )}
-        {saveStatus === 'error' && (
-          <div className="text-red-600 text-sm">
-            ❌ Kļūda saglabājot: {saveError}
-            <br />
-            <span className="text-xs text-gray-500">Pārbaudiet konsoli (F12) kļūdu detaļām</span>
-          </div>
-        )}
+        <span className="text-green-600 dark:text-green-400 text-sm">✅ {TEXTS.bookingConfirmed?.[language] || 'Pieraksts apstiprināts!'}</span>
       </div>
 
       <div className="bg-gray-50 dark:bg-slate-800 p-6 rounded-xl border border-gray-100 dark:border-slate-700 max-w-sm mx-auto text-left mb-8">
