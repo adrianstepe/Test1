@@ -144,7 +144,7 @@
                     "name": "Postgres account 2"
                 }
             },
-            "onError": "continueRegularOutput"
+            "onError": "stopWorkflow"
         },
         {
             "parameters": {
@@ -168,7 +168,7 @@
                     "name": "Gmail account"
                 }
             },
-            "onError": "continueRegularOutput"
+            "onError": "stopWorkflow"
         },
         {
             "parameters": {
@@ -198,7 +198,7 @@
                     "name": "Google Calendar account 2"
                 }
             },
-            "onError": "continueRegularOutput"
+            "onError": "stopWorkflow"
         },
         {
             "parameters": {
