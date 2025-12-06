@@ -13,11 +13,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
     const navigate = useNavigate();
 
     const menuItems = [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'calendar', label: 'Calendar', icon: Calendar },
-        { id: 'patients', label: 'Patient Records', icon: Users },
-        { id: 'messages', label: 'Messages', icon: MessageSquare },
-        { id: 'settings', label: 'Settings', icon: Settings },
+        { id: 'dashboard', label: 'Panelis', icon: LayoutDashboard },
+        { id: 'calendar', label: 'Kalendārs', icon: Calendar },
+        { id: 'patients', label: 'Pacientu kartes', icon: Users },
+        { id: 'messages', label: 'Ziņojumi', icon: MessageSquare },
+        { id: 'settings', label: 'Iestatījumi', icon: Settings },
     ];
 
     const handleSignOut = async () => {
@@ -34,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
                     </div>
                     <span className="font-bold text-xl text-slate-800">Butkeviča</span>
                 </div>
-                <p className="text-xs text-slate-400 mt-1 ml-11">Dental Practice</p>
+                <p className="text-xs text-slate-400 mt-1 ml-11">Zobārstniecības prakse</p>
             </div>
 
             <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
@@ -68,7 +68,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
                 >
                     <LogOut size={20} />
-                    Sign Out
+                    Iziet
                 </button>
             </div>
         </div>

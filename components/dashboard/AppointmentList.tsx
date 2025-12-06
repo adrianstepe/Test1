@@ -75,32 +75,32 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
 
     const copyBookingLink = () => {
         navigator.clipboard.writeText(window.location.origin);
-        alert('Booking link copied to clipboard!');
+        alert('Rezervācijas saite nokopēta!');
     };
 
     return (
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden flex flex-col h-full">
             <div className="p-5 border-b border-gray-100 dark:border-slate-700 flex flex-col gap-4 bg-white dark:bg-slate-800 sticky top-0 z-10">
                 <div className="flex justify-between items-center">
-                    <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">Appointment Requests</h3>
+                    <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">Pierakstu pieprasījumi</h3>
                     <div className="flex bg-gray-100 dark:bg-slate-700 p-1 rounded-lg">
                         <button
                             onClick={() => setDateFilter('today')}
                             className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${dateFilter === 'today' ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                         >
-                            Today
+                            Šodien
                         </button>
                         <button
                             onClick={() => setDateFilter('tomorrow')}
                             className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${dateFilter === 'tomorrow' ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                         >
-                            Tomorrow
+                            Rīt
                         </button>
                         <button
                             onClick={() => setDateFilter('all')}
                             className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${dateFilter === 'all' ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                         >
-                            All Time
+                            Visi
                         </button>
                     </div>
                 </div>
@@ -110,7 +110,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
                         <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
                         <input
                             type="text"
-                            placeholder="Search patients..."
+                            placeholder="Meklēt pacientus..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="pl-9 pr-4 py-2 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all w-full"
@@ -142,11 +142,11 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
                                 onChange={(e) => setFilter(e.target.value)}
                                 className="pl-3 pr-8 py-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 appearance-none cursor-pointer"
                             >
-                                <option value="all">All Status</option>
-                                <option value="pending">Pending</option>
-                                <option value="confirmed">Confirmed</option>
-                                <option value="completed">Completed</option>
-                                <option value="cancelled">Cancelled</option>
+                                <option value="all">Visi statusi</option>
+                                <option value="pending">Gaida</option>
+                                <option value="confirmed">Apstiprināts</option>
+                                <option value="completed">Pabeigts</option>
+                                <option value="cancelled">Atcelts</option>
                             </select>
                             <Filter size={14} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 pointer-events-none" />
                         </div>
@@ -158,26 +158,26 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
                 {error ? (
                     <div className="flex flex-col items-center justify-center h-full text-red-500 p-8 text-center">
                         <AlertCircle size={48} className="mb-4 opacity-50" />
-                        <h4 className="font-bold text-lg mb-2">Failed to load appointments</h4>
+                        <h4 className="font-bold text-lg mb-2">Neizdevās ielādēt pierakstus</h4>
                         <p className="text-sm text-slate-500 max-w-xs">{error}</p>
                     </div>
                 ) : loading ? (
                     <div className="flex flex-col items-center justify-center h-64 text-slate-400">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mb-4"></div>
-                        <p>Loading appointments...</p>
+                        <p>Ielādē pierakstus...</p>
                     </div>
                 ) : filteredBookings.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full py-12 text-slate-400 dark:text-slate-500">
                         <div className="bg-gray-50 dark:bg-slate-700 p-6 rounded-full mb-4">
                             <Calendar size={32} className="text-gray-300 dark:text-slate-500" />
                         </div>
-                        <h4 className="text-slate-700 dark:text-slate-300 font-medium mb-1">No bookings found</h4>
+                        <h4 className="text-slate-700 dark:text-slate-300 font-medium mb-1">Pieraksti nav atrasti</h4>
                         <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 text-center max-w-xs">
                             {dateFilter === 'today'
-                                ? "No bookings scheduled for today."
+                                ? "Šodien nav ieplānotu pierakstu."
                                 : dateFilter === 'tomorrow'
-                                    ? "No bookings scheduled for tomorrow."
-                                    : "No bookings match your current filters."}
+                                    ? "Rīt nav ieplānotu pierakstu."
+                                    : "Neviens pieraksts neatbilst filtriem."}
                         </p>
 
                         <div className="flex gap-3">
@@ -186,11 +186,11 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
                                 className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors"
                             >
                                 <Copy size={16} />
-                                Copy Link
+                                Kopēt saiti
                             </button>
                             <button className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors shadow-sm shadow-teal-200">
                                 <UserPlus size={16} />
-                                Add Walk-in
+                                Pievienot iebraucēju
                             </button>
                         </div>
                     </div>
@@ -198,12 +198,12 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
                     <table className="w-full text-left border-collapse">
                         <thead className="bg-gray-50/50 dark:bg-slate-700/50 sticky top-0 z-0">
                             <tr>
-                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Patient</th>
-                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Service</th>
-                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Provider</th>
-                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date & Time</th>
-                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
-                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Actions</th>
+                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pacients</th>
+                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pakalpojums</th>
+                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Speciālists</th>
+                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Datums un laiks</th>
+                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Statuss</th>
+                                <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Darbības</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
@@ -230,7 +230,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
                                                 <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 flex items-center justify-center text-[10px] font-bold">
                                                     {booking.doctor_name ? booking.doctor_name.charAt(0) : '?'}
                                                 </div>
-                                                <span className="text-sm text-slate-700 dark:text-slate-300">{booking.doctor_name || 'Unassigned'}</span>
+                                                <span className="text-sm text-slate-700 dark:text-slate-300">{booking.doctor_name || 'Nav norādīts'}</span>
                                             </div>
                                         </td>
                                         <td className="p-4">
@@ -249,20 +249,20 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
                                                 <button
                                                     onClick={() => onUpdateStatus(booking.id, 'confirmed')}
                                                     className="p-1.5 text-green-600 hover:text-white hover:bg-green-600 rounded-md transition-colors"
-                                                    title="Confirm"
+                                                    title="Apstiprināt"
                                                 >
                                                     <Check size={16} />
                                                 </button>
                                                 <button
                                                     onClick={() => onUpdateStatus(booking.id, 'cancelled')}
                                                     className="p-1.5 text-red-600 hover:text-white hover:bg-red-600 rounded-md transition-colors"
-                                                    title="Reject/Cancel"
+                                                    title="Noraidīt/Atcelt"
                                                 >
                                                     <X size={16} />
                                                 </button>
                                                 <button
                                                     className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-600 rounded-md transition-colors"
-                                                    title="View Details"
+                                                    title="Skatīt detaļas"
                                                 >
                                                     <Eye size={16} />
                                                 </button>

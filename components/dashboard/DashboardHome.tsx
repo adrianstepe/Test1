@@ -71,8 +71,8 @@ const DashboardHome: React.FC = () => {
             {/* Header */}
             <header className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-8 py-4 flex justify-between items-center sticky top-0 z-20 transition-colors">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Dashboard</h1>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Doctor Focus Mode</p>
+                    <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Panelis</h1>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Ārsta režīms</p>
                 </div>
 
                 <div className="flex items-center gap-4">

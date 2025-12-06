@@ -60,7 +60,7 @@ const AdminDashboard: React.FC = () => {
             .eq('id', id);
 
         if (error) {
-            alert('Failed to update');
+            alert('Neizdevās atjaunināt');
         } else {
             fetchBookings();
         }
@@ -71,29 +71,29 @@ const AdminDashboard: React.FC = () => {
             <div className="max-w-6xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-800">Doctor's Dashboard</h1>
-                        <p className="text-slate-500">Manage incoming web bookings</p>
+                        <h1 className="text-3xl font-bold text-slate-800">Ārsta panelis</h1>
+                        <p className="text-slate-500">Pārvaldīt iesniegtos pierakstus</p>
                     </div>
                     <button
                         onClick={fetchBookings}
                         className="bg-white px-4 py-2 rounded-lg border hover:bg-gray-50 text-sm font-medium"
                     >
-                        🔄 Refresh
+                        🔄 Atjaunot
                     </button>
                 </div>
 
                 {loading ? (
-                    <div className="text-center py-20 text-gray-500">Loading appointments...</div>
+                    <div className="text-center py-20 text-gray-500">Ielādē pierakstus...</div>
                 ) : (
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         <table className="w-full text-left border-collapse">
                             <thead className="bg-slate-50 border-b border-gray-200">
                                 <tr>
-                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date & Time</th>
-                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Patient</th>
-                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Service</th>
-                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
+                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Datums un laiks</th>
+                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Pacients</th>
+                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Pakalpojums</th>
+                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Statuss</th>
+                                    <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Darbības</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -105,10 +105,10 @@ const AdminDashboard: React.FC = () => {
                                         <tr key={booking.id} className={`hover:bg-slate-50 transition-colors ${isPast ? 'opacity-60 bg-gray-50' : ''}`}>
                                             <td className="p-4">
                                                 <div className="font-bold text-slate-800">
-                                                    {date.toLocaleDateString()}
+                                                    {date.toLocaleDateString('lv-LV')}
                                                 </div>
                                                 <div className="text-slate-500 text-sm">
-                                                    {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    {date.toLocaleTimeString('lv-LV', { hour: '2-digit', minute: '2-digit' })}
                                                 </div>
                                             </td>
                                             <td className="p-4">
@@ -117,14 +117,16 @@ const AdminDashboard: React.FC = () => {
                                             </td>
                                             <td className="p-4">
                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                    {booking.service_name || 'General'}
+                                                    {booking.service_name || 'Vispārējs'}
                                                 </span>
                                             </td>
                                             <td className="p-4">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
                             ${booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
                                                         booking.status === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
-                                                    {booking.status}
+                                                    {booking.status === 'confirmed' ? 'Apstiprināts' :
+                                                        booking.status === 'cancelled' ? 'Atcelts' :
+                                                            booking.status === 'completed' ? 'Pabeigts' : booking.status}
                                                 </span>
                                             </td>
                                             <td className="p-4">
@@ -133,9 +135,9 @@ const AdminDashboard: React.FC = () => {
                                                     onChange={(e) => updateStatus(booking.id, e.target.value)}
                                                     className="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                                                 >
-                                                    <option value="confirmed">Confirmed</option>
-                                                    <option value="completed">Completed</option>
-                                                    <option value="cancelled">Cancelled</option>
+                                                    <option value="confirmed">Apstiprināts</option>
+                                                    <option value="completed">Pabeigts</option>
+                                                    <option value="cancelled">Atcelts</option>
                                                 </select>
                                             </td>
                                         </tr>
@@ -145,7 +147,7 @@ const AdminDashboard: React.FC = () => {
                         </table>
 
                         {bookings.length === 0 && (
-                            <div className="p-10 text-center text-gray-400">No bookings found yet.</div>
+                            <div className="p-10 text-center text-gray-400">Pieraksti nav atrasti.</div>
                         )}
                     </div>
                 )}

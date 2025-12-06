@@ -1,6 +1,7 @@
 import React from 'react';
 import { Language, BookingState } from '../types';
 import { TEXTS } from '../constants';
+import { saveBookingToSupabase } from '../services/bookingService';
 
 interface ConfirmationProps {
   language: Language;
@@ -8,6 +9,56 @@ interface ConfirmationProps {
 }
 
 const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
+  const [saveStatus, setSaveStatus] = React.useState<'pending' | 'saved' | 'error'>('pending');
+
+  // Save booking to Supabase when confirmation page loads
+  React.useEffect(() => {
+    const saveBooking = async () => {
+      if (!booking.selectedDate || !booking.selectedTime || !booking.selectedService) {
+        console.error('[Confirmation] Missing booking data, cannot save');
+        setSaveStatus('error');
+        return;
+      }
+
+      // Calculate start and end times
+      const [hours, minutes] = booking.selectedTime.split(':').map(Number);
+      const startDate = new Date(booking.selectedDate);
+      startDate.setHours(hours, minutes, 0, 0);
+
+      const endDate = new Date(startDate);
+      endDate.setMinutes(startDate.getMinutes() + (booking.selectedService.durationMinutes || 60));
+
+      // Prepare booking data
+      const bookingData = {
+        customer_name: `${booking.patientData.firstName} ${booking.patientData.lastName}`,
+        customer_email: booking.patientData.email,
+        phone: booking.patientData.phone,
+        service_id: booking.selectedService.id,
+        service_name: booking.selectedService.name[language] || booking.selectedService.name.EN,
+        start_time: startDate.toISOString(),
+        end_time: endDate.toISOString(),
+        doctor_id: booking.selectedSpecialist?.id,
+        doctor_name: booking.selectedSpecialist?.name,
+        language: language,
+        amount_paid: 30, // Deposit amount
+        status: 'confirmed',
+      };
+
+      console.log('[Confirmation] Saving booking to Supabase:', bookingData);
+
+      const result = await saveBookingToSupabase(bookingData);
+
+      if (result.success) {
+        console.log('[Confirmation] Booking saved successfully:', result.id);
+        setSaveStatus('saved');
+      } else {
+        console.error('[Confirmation] Failed to save booking:', result.error);
+        setSaveStatus('error');
+      }
+    };
+
+    saveBooking();
+  }, []); // Run once on mount
 
   const getEventDetails = () => {
     if (!booking.selectedDate || !booking.selectedTime || !booking.selectedService) return null;
