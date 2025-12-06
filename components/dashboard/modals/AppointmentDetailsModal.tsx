@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Calendar, Clock, User, FileText, CheckCircle, XCircle, Trash2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import { lv } from 'date-fns/locale';
 import { DashboardBooking } from '../../../hooks/useDashboardData';
 
 interface AppointmentDetailsModalProps {
@@ -19,7 +20,7 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsModalProps> = ({ booki
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
                 <div className="p-6 border-b border-gray-100 flex justify-between items-start">
                     <div>
-                        <h3 className="text-xl font-bold text-slate-800">Appointment Details</h3>
+                        <h3 className="text-xl font-bold text-slate-800">Pieraksta detaļas</h3>
                         <p className="text-sm text-slate-500">ID: {booking.id.slice(0, 8)}</p>
                     </div>
                     <button
@@ -60,14 +61,14 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsModalProps> = ({ booki
                         <div className="p-4 border border-gray-100 rounded-xl">
                             <div className="flex items-center gap-2 text-slate-500 mb-1">
                                 <Calendar size={16} />
-                                <span className="text-xs font-medium uppercase">Date</span>
+                                <span className="text-xs font-medium uppercase">Datums</span>
                             </div>
-                            <p className="font-bold text-slate-800">{format(date, 'MMM d, yyyy')}</p>
+                            <p className="font-bold text-slate-800">{format(date, 'd. MMMM yyyy', { locale: lv })}</p>
                         </div>
                         <div className="p-4 border border-gray-100 rounded-xl">
                             <div className="flex items-center gap-2 text-slate-500 mb-1">
                                 <Clock size={16} />
-                                <span className="text-xs font-medium uppercase">Time</span>
+                                <span className="text-xs font-medium uppercase">Laiks</span>
                             </div>
                             <p className="font-bold text-slate-800">{format(date, 'HH:mm')}</p>
                         </div>
@@ -76,11 +77,11 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsModalProps> = ({ booki
                     <div className="p-4 border border-gray-100 rounded-xl">
                         <div className="flex items-center gap-2 text-slate-500 mb-1">
                             <FileText size={16} />
-                            <span className="text-xs font-medium uppercase">Service</span>
+                            <span className="text-xs font-medium uppercase">Pakalpojums</span>
                         </div>
                         <p className="font-bold text-slate-800">{booking.service_name}</p>
                         <p className="text-sm text-slate-500 mt-1">
-                            Provider: <span className="font-medium text-slate-700">{booking.doctor_name || 'Unassigned'}</span>
+                            Speciālists: <span className="font-medium text-slate-700">{booking.doctor_name || 'Nav norādīts'}</span>
                         </p>
                     </div>
                 </div>
@@ -92,7 +93,7 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsModalProps> = ({ booki
                             className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-teal-600 text-white rounded-xl font-bold hover:bg-teal-700 transition-colors shadow-sm shadow-teal-200"
                         >
                             <CheckCircle size={18} />
-                            Confirm
+                            Apstiprināt
                         </button>
                     )}
 
@@ -102,7 +103,7 @@ const AppointmentDetailsModal: React.FC<AppointmentDetailsModalProps> = ({ booki
                             className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-slate-700 rounded-xl font-bold hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
                         >
                             <XCircle size={18} />
-                            Cancel
+                            Atcelt
                         </button>
                     )}
                 </div>

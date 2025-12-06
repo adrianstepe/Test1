@@ -1,5 +1,6 @@
 import React from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO, getHours } from 'date-fns';
+import { lv } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Booking {
@@ -33,7 +34,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ bookings }) => {
     return (
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden h-full flex flex-col">
             <div className="p-4 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-white dark:bg-slate-800">
-                <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">Weekly Schedule</h3>
+                <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">Nedēļas grafiks</h3>
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => setCurrentDate(addDays(currentDate, -7))}
@@ -42,7 +43,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ bookings }) => {
                         <ChevronLeft size={20} />
                     </button>
                     <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                        {format(startDate, 'MMM d')} - {format(addDays(startDate, 4), 'MMM d')}
+                        {format(startDate, 'd. MMM', { locale: lv })} - {format(addDays(startDate, 4), 'd. MMM', { locale: lv })}
                     </span>
                     <button
                         onClick={() => setCurrentDate(addDays(currentDate, 7))}
@@ -69,7 +70,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ bookings }) => {
                     {weekDays.map((day, dayIndex) => (
                         <div key={dayIndex} className="flex-1 border-r border-gray-100 dark:border-slate-700 last:border-r-0">
                             <div className="h-10 border-b border-gray-100 dark:border-slate-700 flex flex-col items-center justify-center bg-gray-50/30 dark:bg-slate-700/30">
-                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{format(day, 'EEE')}</span>
+                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{format(day, 'EEE', { locale: lv })}</span>
                                 <span className="text-[10px] text-slate-400 dark:text-slate-500">{format(day, 'd')}</span>
                             </div>
 

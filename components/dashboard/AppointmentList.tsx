@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import { Search, Filter, CheckCircle, XCircle, Clock, Calendar, Copy, UserPlus, Eye, Check, X, AlertCircle } from 'lucide-react';
 import { format, isSameDay, addDays, parseISO, isToday, isTomorrow } from 'date-fns';
+import { lv } from 'date-fns/locale';
+
+// Latvian status translations
+const STATUS_LABELS: Record<string, string> = {
+    pending: 'Gaida',
+    confirmed: 'Apstiprināts',
+    completed: 'Pabeigts',
+    cancelled: 'Atcelts'
+};
 
 interface Booking {
     id: string;
@@ -235,13 +244,13 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
                                         </td>
                                         <td className="p-4">
                                             <div className="text-sm text-slate-900 dark:text-slate-100 font-medium">
-                                                {format(date, 'MMM d')} • {format(date, 'h:mm a')}
+                                                {format(date, 'd. MMM', { locale: lv })} • {format(date, 'HH:mm')}
                                             </div>
                                         </td>
                                         <td className="p-4">
                                             <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${getStatusColor(booking.status)}`}>
                                                 {getStatusIcon(booking.status)}
-                                                {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                                {STATUS_LABELS[booking.status] || booking.status}
                                             </span>
                                         </td>
                                         <td className="p-4 text-right">
@@ -275,7 +284,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ bookings, loading, er
                     </table>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 

@@ -39,7 +39,7 @@ const DashboardHome: React.FC = () => {
         start_time: b.start_time,
         status: b.status,
         doctor_id: b.doctor_id,
-        doctor_name: b.doctor?.full_name || 'Unassigned',
+        doctor_name: b.doctor?.full_name || 'Nav norādīts',
         duration: b.service?.durationMinutes
     }));
 
