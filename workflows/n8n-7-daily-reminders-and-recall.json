@@ -1,0 +1,413 @@
+{
+    "name": "System - Daily Reminders & Smart Recall",
+    "nodes": [
+        {
+            "parameters": {},
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                -208,
+                320
+            ],
+            "id": "73fd4fdf-49fc-4ac8-b75a-1814cb13416b"
+        },
+        {
+            "parameters": {
+                "triggerTimes": {
+                    "item": [
+                        {
+                            "hour": 9
+                        }
+                    ]
+                }
+            },
+            "name": "Cron (Daily 9AM)",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
+            "position": [
+                -208,
+                8
+            ],
+            "id": "2a195d1a-6e0d-4d98-8b10-6a77fa472068"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT * FROM bookings \nWHERE status = 'booked' \nAND start_time::date = CURRENT_DATE + INTERVAL '1 day';",
+                "options": {}
+            },
+            "name": "Fetch Tomorrow's Bookings",
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                16,
+                -40
+            ],
+            "id": "081d384c-ec23-4776-a581-7d64b647c195",
+            "credentials": {
+                "postgres": {
+                    "id": "GuG495s0j2amZHOv",
+                    "name": "Postgres Main"
+                }
+            },
+            "onError": "stopWorkflow"
+        },
+        {
+            "parameters": {
+                "batchSize": 1,
+                "options": {}
+            },
+            "name": "Split Batches",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 1,
+            "position": [
+                240,
+                -40
+            ],
+            "id": "77690232-876a-4aae-a9b7-ec146cd11d55"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Multi-language Logic (Phone-based)\nconst booking = $input.first().json;\nconst phone = (booking.phone || '').replace(/\\D/g, ''); // Remove non-digits\nconst name = booking.customer_name || 'Patient';\nconst time = booking.start_time;\n\n// Language Rule: Default to Latvian. Only switch to English if phone is foreign.\n// Latvian phones start with 371 or are 8 digits long (local format).\nconst isLatvian = !phone || phone.startsWith('371') || phone.length === 8;\nconst lang = isLatvian ? 'lv' : 'en';\n\nlet emailSubject, emailBody, smsMessage;\n\n// --- LATVIAN (Default) ---\nif (lang === 'lv') {\n  emailSubject = 'Atgādinājums par vizīti - Butkeviča Dental';\n  emailBody = `Cien. ${name},\\n\\nŠis ir oficiāls atgādinājums par Jūsu zobārstniecības vizīti, kas ieplānota rīt plkst. ${time}.\\n\\nLūdzu, ierodieties laikus. Ja nepieciešams pārcelt vizīti, lūdzu, sazinieties ar mums nekavējoties.\\n\\nAr cieņu,\\nButkeviča Dental Practice`;\n  smsMessage = `Atgādinājums: Zobārsta vizīte rīt plkst. ${time}. Uz tikšanos! - Butkeviča Dental`;\n}\n\n// --- ENGLISH (Foreign Phones) ---\nelse {\n  emailSubject = 'Appointment Reminder - Butkeviča Dental';\n  emailBody = `Dear ${name},\\n\\nThis is a formal reminder regarding your dental appointment scheduled for tomorrow at ${time}.\\n\\nPlease ensure you arrive on time. If you need to reschedule, kindly contact us immediately.\\n\\nSincerely,\\nButkeviča Dental Practice`;\n  smsMessage = `Reminder: Dental appointment tomorrow at ${time}. See you soon! - Butkeviča Dental`;\n}\n\nreturn {\n  json: {\n    ...booking,\n    email_subject: emailSubject,\n    email_body: emailBody,\n    sms_message: smsMessage\n  }\n};"
+            },
+            "name": "Language Logic",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                464,
+                -112
+            ],
+            "id": "238544cf-b341-4329-9921-50934fe0e3fb"
+        },
+        {
+            "parameters": {
+                "sendTo": "={{$json.customer_email}}",
+                "subject": "={{$json.email_subject}}",
+                "message": "={{$json.email_body}}",
+                "options": {}
+            },
+            "name": "Send Email (Gmail)",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                688,
+                -112
+            ],
+            "id": "38d66c10-6d51-4ef5-b767-65d004c024d1",
+            "webhookId": "73845e92-cadb-4df5-8272-1aaf250d3b5a",
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "bsHsQyITlAn3DBQk",
+                    "name": "Gmail account"
+                }
+            },
+            "onError": "stopWorkflow"
+        },
+        {
+            "parameters": {
+                "from": "+1234567890",
+                "to": "={{$json.phone}}",
+                "message": "={{$json.sms_message}}",
+                "options": {}
+            },
+            "name": "Send SMS (Twilio)",
+            "type": "n8n-nodes-base.twilio",
+            "typeVersion": 1,
+            "position": [
+                912,
+                -40
+            ],
+            "id": "06f1ddb4-5b9b-432e-ba5f-06a8f3fd843f",
+            "credentials": {
+                "twilioApi": {
+                    "id": "Xa4xPKhO4qtTL5X6",
+                    "name": "Twilio account"
+                }
+            },
+            "onError": "stopWorkflow"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "WITH last_appointments AS (\n  SELECT \n    b.customer_email,\n    b.customer_name,\n    b.customer_phone,\n    CASE \n      WHEN b.customer_phone IS NULL OR b.customer_phone = '' THEN 'lv'\n      WHEN b.customer_phone LIKE '+371%' THEN 'lv'\n      WHEN b.customer_phone LIKE '371%' THEN 'lv'\n      WHEN LENGTH(REGEXP_REPLACE(b.customer_phone, '[^0-9]', '', 'g')) = 8 THEN 'lv'\n      ELSE 'en'\n    END AS language_preference,\n    MAX(b.start_time) AS last_appointment_date\n  FROM bookings b\n  WHERE b.status IN ('completed', 'confirmed')\n    AND b.start_time < NOW()\n  GROUP BY b.customer_email, b.customer_name, b.customer_phone\n),\npatients_with_future_appointments AS (\n  SELECT DISTINCT customer_email\n  FROM bookings\n  WHERE status IN ('confirmed', 'pending')\n    AND start_time > NOW()\n)\nSELECT \n  la.customer_email AS patient_email,\n  la.customer_name AS patient_name,\n  la.language_preference\nFROM last_appointments la\nWHERE \n  la.last_appointment_date >= NOW() - INTERVAL '6 months' - INTERVAL '7 days'\n  AND la.last_appointment_date <= NOW() - INTERVAL '6 months' + INTERVAL '7 days'\n  AND la.customer_email NOT IN (SELECT customer_email FROM patients_with_future_appointments)\nORDER BY la.last_appointment_date ASC;",
+                "options": {}
+            },
+            "id": "ad1edb7b-65af-48ad-a123-0ae7555c3d87",
+            "name": "Fetch Recall Patients",
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                16,
+                272
+            ],
+            "credentials": {
+                "postgres": {
+                    "id": "GuG495s0j2amZHOv",
+                    "name": "Postgres Main"
+                }
+            },
+            "onError": "stopWorkflow"
+        },
+        {
+            "parameters": {
+                "batchSize": 10,
+                "options": {}
+            },
+            "id": "3f38ee9e-8a3d-4df7-b97f-24f0b2ab0aaa",
+            "name": "Split In Batches",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 3,
+            "position": [
+                240,
+                272
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": false,
+                        "leftValue": "",
+                        "typeValidation": "loose"
+                    },
+                    "conditions": [
+                        {
+                            "id": "latvian-check",
+                            "leftValue": "={{ $json.language_preference }}",
+                            "rightValue": "lv",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ],
+                    "combinator": "or"
+                },
+                "options": {}
+            },
+            "id": "3ab879b2-c954-4cd0-886f-1aeb11954edd",
+            "name": "Check Language",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                464,
+                272
+            ]
+        },
+        {
+            "parameters": {
+                "sendTo": "={{ $json.patient_email }}",
+                "subject": "Atgādinājums: Jūsu 6 mēnešu smaida pārbaude",
+                "message": "<p>Sveiki, {{ $json.patient_name }}!</p>\n\n<p>Ir pagājuši 6 mēneši kopš Jūsu pēdējās vizītes. Lai smaids būtu vesels, ārsti rekomendē veikt pārbaudi un higiēnu reizi pusgadā.</p>\n\n<p>Mēs labprāt Jūs pierakstītu uz vizīti nākamajā mēnesī.</p>\n\n<p>📅 <b>Rezervējiet sev ērtu laiku šeit:</b> <a href=\"https://butkevica-dental-booking.pages.dev\">Pieteikt Vizīti</a></p>\n\n<p>Uz drīzu tikšanos,<br>\nButkeviča Dental Practice</p>",
+                "options": {}
+            },
+            "id": "15bbfedc-9200-4da0-923b-97d40fff8e3e",
+            "name": "Send Latvian Email",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                688,
+                176
+            ],
+            "webhookId": "f4a4f24c-9f61-4ce5-8cf3-cded46f2637a",
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "bsHsQyITlAn3DBQk",
+                    "name": "Gmail account"
+                }
+            },
+            "onError": "stopWorkflow"
+        },
+        {
+            "parameters": {
+                "sendTo": "={{ $json.patient_email }}",
+                "subject": "Reminder: Your 6-Month Dental Checkup",
+                "message": "<p>Hello, {{ $json.patient_name }}!</p>\n\n<p>It's been 6 months since your last visit. Dentists recommend a checkup and hygiene appointment every 6 months for optimal oral health.</p>\n\n<p>We'd love to schedule your next appointment!</p>\n\n<p>📅 <b>Book your convenient time here:</b> <a href=\"https://butkevica-dental-booking.pages.dev\">Book Appointment</a></p>\n\n<p>Looking forward to seeing you,<br>\nButkeviča Dental Practice</p>",
+                "options": {}
+            },
+            "id": "adff4a6a-ac9d-4c4b-96be-aaa42f7f4bdc",
+            "name": "Send English Email",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                688,
+                368
+            ],
+            "webhookId": "ad77de7d-0b77-4711-89fc-30df671b2999",
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "bsHsQyITlAn3DBQk",
+                    "name": "Gmail account"
+                }
+            },
+            "onError": "stopWorkflow"
+        },
+        {
+            "parameters": {},
+            "id": "c7f5285d-7ec1-4641-8600-5e725f8d340b",
+            "name": "Merge Results",
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 3,
+            "position": [
+                912,
+                272
+            ]
+        }
+    ],
+    "connections": {
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Fetch Recall Patients",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Cron (Daily 9AM)": {
+            "main": [
+                [
+                    {
+                        "node": "Fetch Tomorrow's Bookings",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Fetch Recall Patients",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fetch Tomorrow's Bookings": {
+            "main": [
+                [
+                    {
+                        "node": "Split Batches",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Split Batches": {
+            "main": [
+                [
+                    {
+                        "node": "Language Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Language Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Send Email (Gmail)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Email (Gmail)": {
+            "main": [
+                [
+                    {
+                        "node": "Send SMS (Twilio)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send SMS (Twilio)": {
+            "main": [
+                [
+                    {
+                        "node": "Split Batches",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fetch Recall Patients": {
+            "main": [
+                [
+                    {
+                        "node": "Split In Batches",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Split In Batches": {
+            "main": [
+                [
+                    {
+                        "node": "Check Language",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check Language": {
+            "main": [
+                [
+                    {
+                        "node": "Send Latvian Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send English Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Latvian Email": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Results",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send English Email": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Results",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        }
+    },
+    "pinData": {},
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "edb1e678c20bb2dc211861028fa5a0da62086103c19f921423bcdc604ef1f332"
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "timezone": "Europe/Riga"
+    }
+}
