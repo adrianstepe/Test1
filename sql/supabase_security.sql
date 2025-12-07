@@ -50,14 +50,17 @@ TO authenticated
 USING (auth.uid() = id);
 
 -- BOOKINGS
+-- SECURITY FIX: Removed "Anyone can create a booking" policy to prevent spam abuse.
+-- Bookings are now ONLY created via the Stripe webhook -> n8n -> Supabase flow.
+-- The n8n workflow uses service_role credentials, which bypass RLS.
+-- This means no INSERT policy is needed for legitimate bookings to work.
+
 DROP POLICY IF EXISTS "Anyone can create a booking" ON public.bookings;
 DROP POLICY IF EXISTS "Admins and Doctors can view all bookings" ON public.bookings;
 DROP POLICY IF EXISTS "Admins and Doctors can update bookings" ON public.bookings;
 
-CREATE POLICY "Anyone can create a booking" 
-ON public.bookings FOR INSERT 
-TO anon, authenticated 
-WITH CHECK (true);
+-- NOTE: No INSERT policy created. service_role bypasses RLS for n8n inserts.
+-- Anonymous clients cannot insert bookings directly - they must go through Stripe payment.
 
 CREATE POLICY "Admins and Doctors can view all bookings" 
 ON public.bookings FOR SELECT 

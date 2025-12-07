@@ -14,24 +14,17 @@ WHERE table_name = 'bookings'
     AND table_schema = 'public'
 ORDER BY ordinal_position;
 
--- 2. Ensure RLS allows anonymous (widget) inserts
+-- 2. SECURITY FIX: Remove permissive anonymous INSERT policy
+-- Bookings are now ONLY created via Stripe webhook -> n8n -> Supabase flow.
+-- The n8n workflow uses service_role credentials, which bypass RLS.
+
 DROP POLICY IF EXISTS "Anyone can create a booking" ON public.bookings;
-
-CREATE POLICY "Anyone can create a booking" 
-ON public.bookings FOR INSERT 
-TO anon, authenticated 
-WITH CHECK (true);
-
--- 3. Also allow anonymous users to READ their own bookings (for testing)
 DROP POLICY IF EXISTS "Anyone can view recent bookings" ON public.bookings;
 
-CREATE POLICY "Anyone can view recent bookings" 
-ON public.bookings FOR SELECT 
-TO anon
-USING (
-    -- Allow reading bookings created in the last hour (for debugging)
-    created_at > NOW() - INTERVAL '1 hour'
-);
+-- NOTE: No INSERT policy is created intentionally.
+-- service_role (used by n8n) bypasses RLS, so legitimate bookings still work.
+-- Anonymous clients cannot insert bookings directly - this prevents spam abuse.
+-- To book an appointment, users MUST complete a Stripe payment first.
 
 -- 4. Check current bookings count
 SELECT COUNT(*) AS total_bookings FROM public.bookings;
