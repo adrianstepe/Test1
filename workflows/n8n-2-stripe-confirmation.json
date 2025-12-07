@@ -48,14 +48,9 @@
                     "value": {
                         "customer_name": "={{ $json.customer_name }}",
                         "customer_email": "={{ $json.customer_email }}",
-                        "customer_phone": "={{ $json.phone }}",
-                        "service_id": "={{ $json.service_id }}",
-                        "service_name": "={{ $json.service_name }}",
                         "start_time": "={{ $json.start_time }}",
                         "end_time": "={{ $json.end_time }}",
-                        "amount_paid": "={{ $json.amount_paid }}",
-                        "status": "={{ $json.status }}",
-                        "stripe_session_id": "={{ $json.stripe_payment_id }}"
+                        "status": "={{ $json.status }}"
                     },
                     "matchingColumns": [],
                     "schema": [
@@ -72,24 +67,6 @@
                             "type": "string"
                         },
                         {
-                            "id": "customer_phone",
-                            "displayName": "customer_phone",
-                            "required": false,
-                            "type": "string"
-                        },
-                        {
-                            "id": "service_id",
-                            "displayName": "service_id",
-                            "required": false,
-                            "type": "string"
-                        },
-                        {
-                            "id": "service_name",
-                            "displayName": "service_name",
-                            "required": false,
-                            "type": "string"
-                        },
-                        {
                             "id": "start_time",
                             "displayName": "start_time",
                             "required": true,
@@ -102,20 +79,8 @@
                             "type": "dateTime"
                         },
                         {
-                            "id": "amount_paid",
-                            "displayName": "amount_paid",
-                            "required": false,
-                            "type": "number"
-                        },
-                        {
                             "id": "status",
                             "displayName": "status",
-                            "required": false,
-                            "type": "string"
-                        },
-                        {
-                            "id": "stripe_session_id",
-                            "displayName": "stripe_session_id",
                             "required": false,
                             "type": "string"
                         }
