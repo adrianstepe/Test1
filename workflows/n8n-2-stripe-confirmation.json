@@ -48,15 +48,14 @@
                     "value": {
                         "customer_name": "={{ $json.customer_name }}",
                         "customer_email": "={{ $json.customer_email }}",
-                        "phone": "={{ $json.phone }}",
-                        "language": "={{ $json.language }}",
+                        "customer_phone": "={{ $json.phone }}",
                         "service_id": "={{ $json.service_id }}",
                         "service_name": "={{ $json.service_name }}",
                         "start_time": "={{ $json.start_time }}",
                         "end_time": "={{ $json.end_time }}",
                         "amount_paid": "={{ $json.amount_paid }}",
                         "status": "={{ $json.status }}",
-                        "stripe_payment_id": "={{ $json.stripe_payment_id }}"
+                        "stripe_session_id": "={{ $json.stripe_payment_id }}"
                     },
                     "matchingColumns": [],
                     "schema": [
@@ -73,14 +72,8 @@
                             "type": "string"
                         },
                         {
-                            "id": "phone",
-                            "displayName": "phone",
-                            "required": false,
-                            "type": "string"
-                        },
-                        {
-                            "id": "language",
-                            "displayName": "language",
+                            "id": "customer_phone",
+                            "displayName": "customer_phone",
                             "required": false,
                             "type": "string"
                         },
@@ -121,8 +114,8 @@
                             "type": "string"
                         },
                         {
-                            "id": "stripe_payment_id",
-                            "displayName": "stripe_payment_id",
+                            "id": "stripe_session_id",
+                            "displayName": "stripe_session_id",
                             "required": false,
                             "type": "string"
                         }
