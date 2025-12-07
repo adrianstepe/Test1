@@ -45,8 +45,8 @@ const Header: React.FC<HeaderProps> = ({ currentLanguage, setLanguage, theme, to
               key={lang}
               onClick={() => setLanguage(lang)}
               className={`px-3 py-1 text-sm rounded-md transition-all ${currentLanguage === lang
-                  ? 'bg-white dark:bg-slate-600 text-primary dark:text-teal-400 shadow-sm font-medium'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                ? 'bg-white dark:bg-slate-600 text-primary dark:text-teal-400 shadow-sm font-medium'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                 }`}
             >
               {lang}

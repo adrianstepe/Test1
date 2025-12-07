@@ -34,7 +34,7 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({ language, selectedS
               aria-pressed={isSelected}
             >
               <span className="text-3xl font-bold text-primary dark:text-teal-400 mb-3 block">
-                €{service.price}
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{TEXTS.startingFrom[language]} </span>€{service.price}
               </span>
 
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">

@@ -1,31 +1,144 @@
 import { TimeSlot } from '../types';
 
+// Supabase Edge Function URL (primary - fast, serverless)
+const getEdgeFunctionUrl = () => {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    if (!supabaseUrl) return null;
+    return `${supabaseUrl}/functions/v1/check-availability`;
+};
+
+// n8n Webhook URL (fallback)
+const getN8nUrl = () => import.meta.env.VITE_N8N_AVAILABILITY_URL;
+
+/**
+ * Check availability for a given date.
+ * 
+ * Architecture (Resilient):
+ * 1. Primary: Supabase Edge Function (serverless, auto-scaling, no VPS dependency)
+ * 2. Fallback: n8n webhook (for backward compatibility during migration)
+ * 
+ * Benefits:
+ * - If Supabase Edge Function is down: Falls back to n8n
+ * - If n8n is down: Edge Function still works
+ * - Lower latency: Edge Function has direct DB access (no HTTP hop)
+ */
 export const checkAvailability = async (date: string): Promise<{ slots: TimeSlot[] }> => {
-    const webhookUrl = import.meta.env.VITE_N8N_AVAILABILITY_URL;
+    const edgeFunctionUrl = getEdgeFunctionUrl();
+    const n8nUrl = getN8nUrl();
 
-    if (!webhookUrl) {
-        console.error("VITE_N8N_AVAILABILITY_URL is missing in .env");
-        throw new Error("Configuration Error");
-    }
+    // Try Supabase Edge Function first (primary)
+    if (edgeFunctionUrl) {
+        try {
+            console.log('[Availability] Trying Supabase Edge Function...');
+            const response = await fetch(`${edgeFunctionUrl}?date=${date}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Include anon key for Supabase auth
+                    'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+                }
+            });
 
-    try {
-        // Call n8n Webhook with GET parameters
-        const response = await fetch(`${webhookUrl}?date=${date}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
+            if (response.ok) {
+                const data = await response.json();
+                console.log('[Availability] Edge Function success:', data.slots?.length, 'slots');
+                return data;
             }
-        });
 
-        if (!response.ok) {
-            throw new Error(`Availability Check Failed: ${response.statusText}`);
+            console.warn('[Availability] Edge Function failed:', response.status, response.statusText);
+        } catch (error) {
+            console.warn('[Availability] Edge Function error, falling back to n8n:', error);
         }
-
-        const data = await response.json();
-        return data; // Expecting { slots: [...] } from n8n
-    } catch (error) {
-        console.error("CRITICAL: Availability Fetch Error. Check network tab and n8n status.", error);
-        // Return empty slots on error so the UI handles it gracefully
-        return { slots: [] };
     }
+
+    // Fallback to n8n webhook
+    if (n8nUrl) {
+        try {
+            console.log('[Availability] Falling back to n8n...');
+            const response = await fetch(`${n8nUrl}?date=${date}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('[Availability] n8n fallback success:', data.slots?.length, 'slots');
+                return data;
+            }
+
+            throw new Error(`n8n Availability Check Failed: ${response.statusText}`);
+        } catch (error) {
+            console.error('[Availability] n8n fallback also failed:', error);
+        }
+    }
+
+    // Both failed - return empty slots so UI handles gracefully
+    console.error('[Availability] CRITICAL: All availability sources failed');
+    return { slots: [] };
+};
+
+/**
+ * Get availability counts for a range of dates.
+ * Returns an object mapping date strings to available slot counts.
+ * Used for the "traffic light" indicators on day cards.
+ */
+export const getWeekAvailability = async (startDate: string, endDate: string): Promise<Record<string, number>> => {
+    const result: Record<string, number> = {};
+
+    // Parse dates and iterate through range
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Fetch availability for each date in parallel
+    const datePromises: Promise<void>[] = [];
+    const currentDate = new Date(start);
+
+    while (currentDate <= end) {
+        const dateStr = currentDate.toLocaleDateString('en-CA');
+        const fetchDate = new Date(currentDate);
+
+        datePromises.push(
+            checkAvailability(dateStr).then(data => {
+                const availableCount = data.slots?.filter(s => s.available).length || 0;
+                result[fetchDate.toLocaleDateString('en-CA')] = availableCount;
+            }).catch(() => {
+                result[fetchDate.toLocaleDateString('en-CA')] = 0;
+            })
+        );
+
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    await Promise.all(datePromises);
+    return result;
+};
+
+/**
+ * Find the first date with at least one available slot.
+ * Searches up to maxDaysAhead days into the future.
+ */
+export const getFirstAvailableDate = async (maxDaysAhead: number = 60): Promise<{ date: string; time: string } | null> => {
+    const today = new Date();
+
+    for (let i = 1; i <= maxDaysAhead; i++) {
+        const checkDate = new Date(today);
+        checkDate.setDate(today.getDate() + i);
+        const dateStr = checkDate.toLocaleDateString('en-CA');
+
+        try {
+            const data = await checkAvailability(dateStr);
+            const availableSlot = data.slots?.find(s => s.available);
+
+            if (availableSlot) {
+                return { date: dateStr, time: availableSlot.time };
+            }
+        } catch (error) {
+            console.warn(`[FirstAvailable] Failed to check ${dateStr}:`, error);
+            continue;
+        }
+    }
+
+    return null;
 };

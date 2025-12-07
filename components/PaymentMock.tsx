@@ -21,6 +21,7 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const depositAmount = 30; // Fixed deposit
+  const remainingBalance = service.price - depositAmount;
 
   const handlePay = async () => {
     setLoading(true);
@@ -123,116 +124,164 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
     }
   };
 
+  // Format date for display - cleaner format: "Mon, 8 Dec • 09:00"
+  const formatDisplayDate = (date: Date | null, time: string | null) => {
+    if (!date) return '-';
+    const locale = language === Language.EN ? 'en-US' : language === Language.LV ? 'lv-LV' : 'ru-RU';
+    const weekday = date.toLocaleDateString(locale, { weekday: 'short' });
+    const day = date.getDate();
+    const month = date.toLocaleDateString(locale, { month: 'short' });
+    return `${weekday}, ${day} ${month}${time ? ` • ${time}` : ''}`;
+  };
+
   return (
-    <div className="animate-fade-in max-w-md mx-auto">
-      {/* Reservation Fee Policy Information */}
-      <div className="bg-teal-50 dark:bg-teal-900/20 p-6 rounded-xl border-2 border-teal-200 dark:border-teal-800 mb-6">
-        <div className="flex items-start gap-3 mb-4">
-          <div className="text-2xl">ℹ️</div>
+    <div className="animate-fade-in max-w-md mx-auto pb-28 sm:pb-0">
+      {/* Clean Receipt Header */}
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{TEXTS.appointmentSummary[language]}</h2>
+      </div>
+
+      {/* Appointment Details - Clean List with Dividers (No Card Container) */}
+      <div className="space-y-0 mb-8">
+        {/* Date & Time Row */}
+        <div className="flex items-center gap-3 py-4 border-b border-gray-100 dark:border-slate-700">
+          <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
           <div className="flex-1">
-            <h3 className="font-bold text-teal-900 dark:text-teal-100 mb-3 text-lg">
-              {TEXTS.reservationFeeTitle[language]} 30 €
-            </h3>
-            <ul className="space-y-2 text-sm text-teal-800 dark:text-teal-200">
-              <li className="flex gap-2">
-                <span className="text-teal-600 dark:text-teal-400 font-bold">•</span>
-                <span>{TEXTS.reservationFeeDesc1[language]}</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-teal-600 dark:text-teal-400 font-bold">✓</span>
-                <span>{TEXTS.reservationFeeDesc2[language]}</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-teal-600 dark:text-teal-400 font-bold">✗</span>
-                <span>{TEXTS.reservationFeeDesc3[language]}</span>
-              </li>
-            </ul>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{TEXTS.dateLabel[language]} & {TEXTS.timeLabel[language]}</p>
+            <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatDisplayDate(booking.selectedDate, booking.selectedTime)}</p>
           </div>
         </div>
-      </div>
 
-      <div className="bg-gray-50 dark:bg-slate-800 p-6 rounded-xl border border-gray-200 dark:border-slate-700 mb-6">
-        <h3 className="font-bold text-gray-900 dark:text-white mb-4">{TEXTS.personalInfo[language]}</h3>
-        <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-          <div className="flex justify-between">
-            <span>{TEXTS.firstName[language]} {TEXTS.lastName[language]}</span>
-            <span className="font-medium text-gray-900 dark:text-white">{booking.patientData.firstName} {booking.patientData.lastName}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>{TEXTS.email[language]}</span>
-            <span className="font-medium text-gray-900 dark:text-white">{booking.patientData.email}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>{TEXTS.phone[language]}</span>
-            <span className="font-medium text-gray-900 dark:text-white">{booking.patientData.phone}</span>
+        {/* Service Row */}
+        <div className="flex items-center gap-3 py-4 border-b border-gray-100 dark:border-slate-700">
+          <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <div className="flex-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400">{TEXTS.serviceLabel[language]}</p>
+            <p className="text-sm font-semibold text-gray-900 dark:text-white">{service.name[language]}</p>
           </div>
         </div>
-      </div>
 
-      <div className="bg-gray-50 dark:bg-slate-800 p-6 rounded-xl border border-gray-200 dark:border-slate-700 mb-6">
-        <h3 className="font-bold text-gray-900 dark:text-white mb-4">{TEXTS.total[language]}</h3>
-        <div className="flex justify-between text-sm mb-2 text-gray-600 dark:text-gray-400">
-          <span>{service.name[language]}</span>
-          <span>€{service.price}</span>
-        </div>
-        <div className="flex justify-between text-sm mb-4 text-gray-600 dark:text-gray-400">
-          <span>Reservation Fee (Deposit)</span>
-          <span>€{depositAmount}</span>
-        </div>
-        <div className="border-t border-gray-200 dark:border-slate-700 pt-4 flex justify-between font-bold text-lg text-secondary dark:text-teal-400">
-          <span>{TEXTS.deposit[language]}</span>
-          <span>€{depositAmount}</span>
-        </div>
-      </div>
-
-      <div className="border border-gray-200 dark:border-slate-700 rounded-xl p-6 bg-white dark:bg-slate-800 shadow-sm text-center">
-        <div className="w-16 h-16 bg-teal-50 dark:bg-teal-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
-          🔒
-        </div>
-
-        <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Secure Checkout</h4>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-          You will be redirected to Stripe to securely complete your payment of €{depositAmount}.
-        </p>
-
-        {errorMsg && (
-          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg border border-red-100 dark:border-red-800">
-            {errorMsg}
+        {/* Specialist Row (if selected) */}
+        {booking.selectedSpecialist && (
+          <div className="flex items-center gap-3 py-4 border-b border-gray-100 dark:border-slate-700">
+            <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400">{TEXTS.specialistLabel[language]}</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">{booking.selectedSpecialist.name}</p>
+            </div>
           </div>
         )}
 
-        {paymentUrl ? (
-          <a
-            href={paymentUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full py-4 rounded-xl font-bold text-white shadow-lg bg-primary hover:bg-teal-700 flex items-center justify-center gap-2 no-underline"
-          >
-            <span>Continue to Payment &rarr;</span>
-          </a>
-        ) : (
-          <button
-            onClick={handlePay}
-            disabled={loading}
-            className={`w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 ${loading ? 'bg-gray-400 cursor-wait' : 'bg-primary hover:bg-teal-700'
-              }`}
-          >
-            {loading ? (
-              <span>Preparing Checkout...</span>
-            ) : (
-              <>
-                <span>{TEXTS.paySecure[language]} €{depositAmount}</span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </>
-            )}
-          </button>
-        )}
+        {/* Patient Row */}
+        <div className="flex items-center gap-3 py-4 border-b border-gray-100 dark:border-slate-700">
+          <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div className="flex-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400">{TEXTS.personalInfo[language]}</p>
+            <p className="text-sm font-semibold text-gray-900 dark:text-white">{booking.patientData.firstName} {booking.patientData.lastName}</p>
+          </div>
+        </div>
+      </div>
 
-        <div className="mt-4 flex items-center justify-center gap-2 text-gray-400 dark:text-gray-500 grayscale opacity-60">
-          <span className="text-xs font-semibold">Powered by</span>
-          <span className="font-bold italic text-lg">Stripe</span>
+      {/* Receipt-Style Pricing Section */}
+      <div className="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-5 mb-6">
+        {/* Total Cost */}
+        <div className="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-slate-700">
+          <span className="text-sm text-gray-600 dark:text-gray-400">{TEXTS.total[language]}</span>
+          <span className="text-sm font-medium text-gray-900 dark:text-white">€{service.price}</span>
+        </div>
+
+        {/* Remaining Balance */}
+        <div className="flex justify-between items-center py-3 border-b border-gray-200 dark:border-slate-700">
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            {language === Language.EN ? 'Balance Due at Clinic' : language === Language.LV ? 'Atlikusī summa klīnikā' : 'Остаток в клинике'}
+          </span>
+          <span className="text-sm font-medium text-gray-900 dark:text-white">€{remainingBalance}</span>
+        </div>
+
+        {/* Due Now - Large and Bold */}
+        <div className="flex justify-between items-center pt-4">
+          <div>
+            <span className="text-base font-bold text-gray-900 dark:text-white block">
+              {language === Language.EN ? 'Due Now' : language === Language.LV ? 'Maksājams tagad' : 'К оплате сейчас'}
+            </span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {language === Language.EN ? 'Deposit to secure your slot' : language === Language.LV ? 'Depozīts rezervācijai' : 'Депозит для бронирования'}
+            </span>
+          </div>
+          <span className="text-2xl font-bold text-primary">€{depositAmount}</span>
+        </div>
+      </div>
+
+      {/* Trust Signal - Compact Info */}
+      <div className="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400 mb-6 px-1">
+        <svg className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+        </svg>
+        <span>{TEXTS.reservationFeeDesc2[language]}</span>
+      </div>
+
+      {/* Error Message */}
+      {errorMsg && (
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg">
+          {errorMsg}
+        </div>
+      )}
+
+      {/* Sticky Payment Button - Mobile */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t dark:border-slate-700 p-4 shadow-lg sm:relative sm:border-0 sm:shadow-none sm:bg-transparent dark:sm:bg-transparent sm:p-0 z-50">
+        <div className="max-w-md mx-auto">
+          {paymentUrl ? (
+            <a
+              href={paymentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-4 rounded-xl font-bold text-white shadow-lg bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 flex items-center justify-center gap-2 no-underline transition-all"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+              </svg>
+              <span>Continue to Payment</span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          ) : (
+            <button
+              onClick={handlePay}
+              disabled={loading}
+              className={`w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 ${loading ? 'bg-gray-400 cursor-wait' : 'bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700'
+                }`}
+            >
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                  </svg>
+                  <span>{TEXTS.paySecure[language]} • €{depositAmount}</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </>
+              )}
+            </button>
+          )}
+          <div className="mt-3 flex items-center justify-center gap-1.5 text-gray-400 dark:text-gray-500">
+            <span className="text-xs font-semibold">Powered by</span>
+            <span className="font-bold italic text-lg">Stripe</span>
+          </div>
         </div>
       </div>
     </div>

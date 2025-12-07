@@ -126,14 +126,14 @@ const BookingWidget: React.FC = () => {
         }
     };
 
-    const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
-    useEffect(() => {
-        // Initialize state from DOM or localStorage
-        if (document.documentElement.classList.contains('dark')) {
-            setTheme('dark');
+    // Theme: Always default to light mode for clean medical aesthetic
+    // User can toggle manually, persisted to localStorage
+    const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+        if (typeof window !== 'undefined' && localStorage.theme === 'dark') {
+            return 'dark';
         }
-    }, []);
+        return 'light';
+    });
 
     const toggleTheme = () => {
         const newTheme = theme === 'light' ? 'dark' : 'light';
