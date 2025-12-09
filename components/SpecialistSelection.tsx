@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Language, Specialist, Service, TimeSlot } from '../types';
-import { SPECIALISTS, TEXTS } from '../constants';
+import { useConfig } from '../hooks/useConfig';
 import { checkAvailability, getWeekAvailability, getFirstAvailableDate } from '../services/api';
 
 interface SpecialistSelectionProps {
@@ -24,8 +24,10 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
   onSelectDate,
   onSelectTime,
 }) => {
+  const { specialists, texts } = useConfig();
+
   // Filter specialists who can perform the selected service
-  const availableSpecialists = SPECIALISTS.filter(s => s.specialties.includes(selectedService.id));
+  const availableSpecialists = specialists.filter(s => s.specialties.includes(selectedService.id));
 
   // Week navigation state - allows booking up to 8 months (35 weeks) ahead
   const [weekOffset, setWeekOffset] = useState(0);
@@ -207,7 +209,7 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
     <div className="space-y-8 animate-fade-in">
       {/* Specialist Selection */}
       <div>
-        <h2 className="text-xl font-bold text-secondary dark:text-white mb-4">{TEXTS.selectSpecialist[language]}</h2>
+        <h2 className="text-xl font-bold text-secondary dark:text-white mb-4">{texts.selectSpecialist[language]}</h2>
         <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
           {/* Option for "Any Specialist" */}
           <button
@@ -220,7 +222,7 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
             <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center text-2xl mb-2">
               🏥
             </div>
-            <span className="text-sm font-medium text-center text-gray-900 dark:text-gray-100">{TEXTS.anySpecialist[language]}</span>
+            <span className="text-sm font-medium text-center text-gray-900 dark:text-gray-100">{texts.anySpecialist[language]}</span>
           </button>
 
           {availableSpecialists.map((spec) => (
@@ -244,7 +246,7 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
       <div>
         {/* Header with Title and "Next Available" Shortcut */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-secondary dark:text-white">{TEXTS.stepDate[language]}</h2>
+          <h2 className="text-xl font-bold text-secondary dark:text-white">{texts.stepDate[language]}</h2>
           <button
             onClick={handleNextAvailable}
             disabled={findingNext}
@@ -256,14 +258,14 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>{TEXTS.findingSlot[language]}</span>
+                <span>{texts.findingSlot[language]}</span>
               </>
             ) : (
               <>
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
                 </svg>
-                <span>{TEXTS.nextAvailable[language]}</span>
+                <span>{texts.nextAvailable[language]}</span>
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -366,7 +368,7 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
         {loading ? (
           <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-primary"></div>
-            <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm">{TEXTS.checkingAvailability[language]}</p>
+            <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm">{texts.checkingAvailability[language]}</p>
           </div>
         ) : (
           <>
@@ -390,10 +392,10 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
               ))}
             </div>
             {selectedDate && slots.length === 0 && (
-              <p className="text-center text-gray-500 dark:text-gray-400 mt-4 text-sm">{TEXTS.noSlotsDate[language]}</p>
+              <p className="text-center text-gray-500 dark:text-gray-400 mt-4 text-sm">{texts.noSlotsDate[language]}</p>
             )}
             {selectedDate && slots.length > 0 && slots.every(s => !s.available) && (
-              <p className="text-center text-gray-500 dark:text-gray-400 mt-4 text-sm">{TEXTS.allBooked[language]}</p>
+              <p className="text-center text-gray-500 dark:text-gray-400 mt-4 text-sm">{texts.allBooked[language]}</p>
             )}
           </>
         )}

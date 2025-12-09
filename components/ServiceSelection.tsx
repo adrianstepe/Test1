@@ -1,6 +1,6 @@
 import React from 'react';
 import { Service, Language } from '../types';
-import { SERVICES, TEXTS } from '../constants';
+import { useConfig } from '../hooks/useConfig';
 
 interface ServiceSelectionProps {
   language: Language;
@@ -9,15 +9,26 @@ interface ServiceSelectionProps {
 }
 
 const ServiceSelection: React.FC<ServiceSelectionProps> = ({ language, selectedService, onSelect }) => {
+  const { services, texts, isLoading } = useConfig();
+
+  if (isLoading) {
+    return (
+      <div className="animate-fade-in w-full flex flex-col items-center justify-center py-12">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-primary"></div>
+        <p className="text-gray-500 dark:text-gray-400 mt-4 text-sm">Loading services...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="animate-fade-in w-full">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-secondary dark:text-white mb-2">{TEXTS.selectService[language]}</h2>
+        <h2 className="text-2xl font-bold text-secondary dark:text-white mb-2">{texts.selectService[language]}</h2>
         <p className="text-gray-500 dark:text-gray-400">Choose a treatment to view availability and pricing.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {SERVICES.map((service) => {
+        {services.map((service) => {
           const isSelected = selectedService?.id === service.id;
 
           return (
@@ -34,7 +45,7 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({ language, selectedS
               aria-pressed={isSelected}
             >
               <span className="text-3xl font-bold text-primary dark:text-teal-400 mb-3 block">
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{TEXTS.startingFrom[language]} </span>€{service.price}
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{texts.startingFrom[language]} </span>€{service.price}
               </span>
 
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">

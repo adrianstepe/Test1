@@ -1,6 +1,6 @@
 import React from 'react';
 import { Language } from '../types';
-import { TEXTS } from '../constants';
+import { useTexts } from '../hooks/useConfig';
 
 interface ProgressBarProps {
   currentStep: number;
@@ -8,11 +8,13 @@ interface ProgressBarProps {
 }
 
 const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, language }) => {
+  const texts = useTexts();
+
   const steps = [
-    { num: 1, label: TEXTS.stepService[language] },
-    { num: 2, label: TEXTS.stepDate[language] },
-    { num: 3, label: TEXTS.stepDetails[language] },
-    { num: 4, label: TEXTS.stepPayment[language] },
+    { num: 1, label: texts.stepService[language] },
+    { num: 2, label: texts.stepDate[language] },
+    { num: 3, label: texts.stepDetails[language] },
+    { num: 4, label: texts.stepPayment[language] },
   ];
 
   return (
@@ -31,8 +33,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, language }) => {
           <div key={step.num} className="flex flex-col items-center">
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors duration-300 ${currentStep >= step.num
-                  ? 'bg-primary text-white ring-4 ring-teal-50 dark:ring-teal-900/30'
-                  : 'bg-white dark:bg-slate-800 text-gray-400 dark:text-slate-600 border-2 border-gray-200 dark:border-slate-700'
+                ? 'bg-primary text-white ring-4 ring-teal-50 dark:ring-teal-900/30'
+                : 'bg-white dark:bg-slate-800 text-gray-400 dark:text-slate-600 border-2 border-gray-200 dark:border-slate-700'
                 }`}
             >
               {currentStep > step.num ? '✓' : step.num}

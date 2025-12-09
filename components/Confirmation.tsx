@@ -1,6 +1,6 @@
 import React from 'react';
 import { Language, BookingState } from '../types';
-import { TEXTS } from '../constants';
+import { useTexts } from '../hooks/useConfig';
 // REMOVED: saveBookingToSupabase import - n8n webhook is now the single source of truth
 // This fixes the dual-write race condition that could cause duplicate entries
 
@@ -10,6 +10,8 @@ interface ConfirmationProps {
 }
 
 const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
+  const texts = useTexts();
+
   // ARCHITECTURE NOTE:
   // The frontend does NOT write to the database anymore.
   // The Stripe webhook -> n8n workflow is the single source of truth.
@@ -77,7 +79,7 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
       });
 
       if (response.ok) {
-        alert(TEXTS.calendarAdded[language] || "Added to Calendar!");
+        alert(texts.calendarAdded[language] || "Added to Calendar!");
       } else {
         console.error("Failed to sync calendar");
       }
@@ -93,26 +95,26 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
       <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600 dark:text-green-400 text-4xl">
         ✓
       </div>
-      <h2 className="text-2xl font-bold text-secondary dark:text-white mb-2">{TEXTS.successTitle[language]}</h2>
-      <p className="text-gray-500 dark:text-gray-400 mb-4">{TEXTS.successMsg[language]}</p>
+      <h2 className="text-2xl font-bold text-secondary dark:text-white mb-2">{texts.successTitle[language]}</h2>
+      <p className="text-gray-500 dark:text-gray-400 mb-4">{texts.successMsg[language]}</p>
 
       {/* Booking confirmation message - data saved via Stripe webhook -> n8n */}
       <div className="mb-6">
-        <span className="text-green-600 dark:text-green-400 text-sm">✅ {TEXTS.bookingConfirmed?.[language] || 'Pieraksts apstiprināts!'}</span>
+        <span className="text-green-600 dark:text-green-400 text-sm">✅ {(texts as any).bookingConfirmed?.[language] || 'Pieraksts apstiprināts!'}</span>
       </div>
 
       <div className="bg-gray-50 dark:bg-slate-800 p-6 rounded-xl border border-gray-100 dark:border-slate-700 max-w-sm mx-auto text-left mb-8">
         <div className="space-y-3">
           <div className="flex justify-between gap-4">
-            <span className="text-gray-500 dark:text-gray-400 text-sm">{TEXTS.stepService[language]}</span>
+            <span className="text-gray-500 dark:text-gray-400 text-sm">{texts.stepService[language]}</span>
             <span className="font-medium text-gray-900 dark:text-white text-right">{booking.selectedService?.name[language]}</span>
           </div>
           <div className="flex justify-between gap-4">
-            <span className="text-gray-500 dark:text-gray-400 text-sm">{TEXTS.selectSpecialist[language]}</span>
-            <span className="font-medium text-gray-900 dark:text-white text-right">{booking.selectedSpecialist?.name || TEXTS.anySpecialist[language]}</span>
+            <span className="text-gray-500 dark:text-gray-400 text-sm">{texts.selectSpecialist[language]}</span>
+            <span className="font-medium text-gray-900 dark:text-white text-right">{booking.selectedSpecialist?.name || texts.anySpecialist[language]}</span>
           </div>
           <div className="flex justify-between gap-4">
-            <span className="text-gray-500 dark:text-gray-400 text-sm">{TEXTS.stepDate[language]}</span>
+            <span className="text-gray-500 dark:text-gray-400 text-sm">{texts.stepDate[language]}</span>
             <span className="font-medium text-gray-900 dark:text-white text-right">{booking.selectedDate?.toLocaleDateString()}</span>
           </div>
           <div className="flex justify-between gap-4">
@@ -128,7 +130,7 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
           disabled={syncLoading}
           className={`w-full max-w-xs mx-auto block py-3 px-4 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 ${syncLoading ? 'opacity-50 cursor-wait' : ''}`}
         >
-          📅 {syncLoading ? 'Syncing...' : `${TEXTS.addToCalendar[language]} (Google)`}
+          📅 {syncLoading ? 'Syncing...' : `${texts.addToCalendar[language]} (Google)`}
         </button>
       </div>
     </div>

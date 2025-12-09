@@ -7,10 +7,12 @@ import PatientForm from './components/PatientForm';
 import PaymentMock from './components/PaymentMock';
 import Confirmation from './components/Confirmation';
 import { Language, BookingState } from './types';
-import { TEXTS } from './constants';
+import { useTexts } from './hooks/useConfig';
 import { checkAvailability } from './services/api';
 
 const BookingWidget: React.FC = () => {
+    const texts = useTexts();
+
     const [booking, setBooking] = useState<BookingState>(() => {
         // Lazy Initialization: Synchronously read from localStorage to prevent race conditions
         if (typeof window !== 'undefined') {
@@ -219,7 +221,7 @@ const BookingWidget: React.FC = () => {
                                 : 'text-gray-600 hover:bg-gray-100'
                                 }`}
                         >
-                            {TEXTS.back[booking.language]}
+                            {texts.back[booking.language]}
                         </button>
 
                         <button
@@ -230,7 +232,7 @@ const BookingWidget: React.FC = () => {
                                 : 'bg-gray-300 cursor-not-allowed shadow-none'
                                 }`}
                         >
-                            {TEXTS.next[booking.language]}
+                            {texts.next[booking.language]}
                         </button>
                     </div>
                 )}

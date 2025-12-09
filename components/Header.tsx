@@ -1,6 +1,5 @@
 import React from 'react';
-import { Language, Translations } from '../types';
-import { TEXTS } from '../constants';
+import { Language } from '../types';
 
 interface HeaderProps {
   currentLanguage: Language;

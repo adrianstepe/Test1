@@ -1,6 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
-import { SERVICES } from '../constants';
-import { Language } from '../types';
+import { fetchServices } from './configService';
+import { Language, Service } from '../types';
+import { SERVICES as FALLBACK_SERVICES } from '../constants';
 
 export const suggestService = async (symptoms: string, language: Language): Promise<string | null> => {
   try {
@@ -12,8 +13,16 @@ export const suggestService = async (symptoms: string, language: Language): Prom
 
     const ai = new GoogleGenAI({ apiKey });
 
+    // Fetch services dynamically (with fallback)
+    let services: Service[];
+    try {
+      services = await fetchServices();
+    } catch {
+      services = FALLBACK_SERVICES;
+    }
+
     // Create a lean prompt context
-    const serviceList = SERVICES.map(s => `${s.id}: ${s.name[Language.EN]} (${s.description[Language.EN]})`).join('\n');
+    const serviceList = services.map(s => `${s.id}: ${s.name[Language.EN]} (${s.description[Language.EN]})`).join('\n');
 
     const prompt = `
       You are a dental receptionist assistant.
@@ -33,7 +42,7 @@ export const suggestService = async (symptoms: string, language: Language): Prom
     });
 
     const text = response.text?.trim();
-    if (text && SERVICES.some(s => s.id === text)) {
+    if (text && services.some(s => s.id === text)) {
       return text;
     }
     return 's1';

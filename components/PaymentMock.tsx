@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Language, Service, BookingState } from '../types';
-import { TEXTS } from '../constants';
+import { useTexts } from '../hooks/useConfig';
 
 // Declare Stripe on window object to avoid TS errors without installing types
 declare global {
@@ -17,6 +17,7 @@ interface PaymentMockProps {
 }
 
 const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking }) => {
+  const texts = useTexts();
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
@@ -138,7 +139,7 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
     <div className="animate-fade-in max-w-md mx-auto pb-28 sm:pb-0">
       {/* Clean Receipt Header */}
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{TEXTS.appointmentSummary[language]}</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{texts.appointmentSummary[language]}</h2>
       </div>
 
       {/* Appointment Details - Clean List with Dividers (No Card Container) */}
@@ -149,7 +150,7 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           <div className="flex-1">
-            <p className="text-xs text-gray-500 dark:text-gray-400">{TEXTS.dateLabel[language]} & {TEXTS.timeLabel[language]}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{texts.dateLabel[language]} & {texts.timeLabel[language]}</p>
             <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatDisplayDate(booking.selectedDate, booking.selectedTime)}</p>
           </div>
         </div>
@@ -160,7 +161,7 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
           <div className="flex-1">
-            <p className="text-xs text-gray-500 dark:text-gray-400">{TEXTS.serviceLabel[language]}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{texts.serviceLabel[language]}</p>
             <p className="text-sm font-semibold text-gray-900 dark:text-white">{service.name[language]}</p>
           </div>
         </div>
@@ -172,7 +173,7 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
             <div className="flex-1">
-              <p className="text-xs text-gray-500 dark:text-gray-400">{TEXTS.specialistLabel[language]}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{texts.specialistLabel[language]}</p>
               <p className="text-sm font-semibold text-gray-900 dark:text-white">{booking.selectedSpecialist.name}</p>
             </div>
           </div>
@@ -184,7 +185,7 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div className="flex-1">
-            <p className="text-xs text-gray-500 dark:text-gray-400">{TEXTS.personalInfo[language]}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{texts.personalInfo[language]}</p>
             <p className="text-sm font-semibold text-gray-900 dark:text-white">{booking.patientData.firstName} {booking.patientData.lastName}</p>
           </div>
         </div>
@@ -194,7 +195,7 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
       <div className="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-5 mb-6">
         {/* Total Cost */}
         <div className="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-slate-700">
-          <span className="text-sm text-gray-600 dark:text-gray-400">{TEXTS.total[language]}</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">{texts.total[language]}</span>
           <span className="text-sm font-medium text-gray-900 dark:text-white">€{service.price}</span>
         </div>
 
@@ -225,7 +226,7 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
         <svg className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
           <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
         </svg>
-        <span>{TEXTS.reservationFeeDesc2[language]}</span>
+        <span>{texts.reservationFeeDesc2[language]}</span>
       </div>
 
       {/* Error Message */}
@@ -270,7 +271,7 @@ const PaymentMock: React.FC<PaymentMockProps> = ({ language, service, booking })
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                   </svg>
-                  <span>{TEXTS.paySecure[language]} • €{depositAmount}</span>
+                  <span>{texts.paySecure[language]} • €{depositAmount}</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>

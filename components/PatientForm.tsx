@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Language, PatientData } from '../types';
-import { TEXTS } from '../constants';
+import { useTexts } from '../hooks/useConfig';
 
 interface PatientFormProps {
   language: Language;
@@ -19,15 +19,16 @@ const COUNTRY_CODES = [
 ];
 
 const PatientForm: React.FC<PatientFormProps> = ({ language, data, updateData }) => {
+  const texts = useTexts();
   const [countryCode, setCountryCode] = useState('+371');
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <h2 className="text-xl font-bold text-secondary dark:text-white">{TEXTS.personalInfo[language]}</h2>
+      <h2 className="text-xl font-bold text-secondary dark:text-white">{texts.personalInfo[language]}</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{TEXTS.firstName[language]} *</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{texts.firstName[language]} *</label>
           <input
             type="text"
             required
@@ -37,7 +38,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ language, data, updateData })
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{TEXTS.lastName[language]} *</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{texts.lastName[language]} *</label>
           <input
             type="text"
             required
@@ -50,7 +51,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ language, data, updateData })
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{TEXTS.email[language]} *</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{texts.email[language]} *</label>
           <input
             type="email"
             required
@@ -60,7 +61,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ language, data, updateData })
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{TEXTS.phone[language]} *</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{texts.phone[language]} *</label>
           <div className="flex">
             <select
               value={countryCode}
@@ -87,7 +88,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ language, data, updateData })
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          {TEXTS.symptoms[language]}
+          {texts.symptoms[language]}
         </label>
         <textarea
           rows={3}
@@ -114,7 +115,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ language, data, updateData })
             </svg>
           </div>
           <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors select-none">
-            {TEXTS.gdprLabel[language]} <a href="#" className="text-primary hover:underline">Read Policy</a>.
+            {texts.gdprLabel[language]} <a href="#" className="text-primary hover:underline">Read Policy</a>.
           </span>
         </label>
       </div>

@@ -4,7 +4,6 @@ import KPICards from './KPICards';
 import AppointmentList from './AppointmentList';
 import CalendarView from './CalendarView';
 import { Bell, ChevronDown, Check, Sun, Moon, LogOut } from 'lucide-react';
-import { SPECIALISTS } from '../../constants';
 import { useDashboardData } from '../../hooks/useDashboardData';
 import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';

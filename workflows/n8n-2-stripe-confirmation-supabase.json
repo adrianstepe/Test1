@@ -18,7 +18,7 @@
         },
         {
             "parameters": {
-                "jsCode": "const item = $input.first();\nconst rawJson = item.json;\nconst eventData = rawJson.body || rawJson;\n\nif (eventData.type !== 'checkout.session.completed') {\n  return [];\n}\n\nconst dataObject = eventData?.data?.object || {};\nconst metadata = dataObject.metadata || {};\nconst customerDetails = dataObject.customer_details || {};\n\nconst customerName = customerDetails.name || metadata.customer_name || 'Valued Patient';\nlet customerEmail = customerDetails.email || metadata.customer_email || 'missing@error.com';\nconst rawPhone = customerDetails.phone || metadata.phone || metadata.customer_phone || '';\nconst amountPaid = ((dataObject.amount_total || 0) / 100).toFixed(2);\nconst bookingDate = metadata.booking_date;\nconst bookingTime = metadata.booking_time;\n\nlet eventStart = null;\nlet eventEnd = null;\nif (bookingDate && bookingTime) {\n  const startDate = new Date(bookingDate + 'T' + bookingTime + ':00');\n  eventStart = startDate.toISOString();\n  eventEnd = new Date(startDate.getTime() + 3600000).toISOString();\n}\n\nlet lang = 'lv';\nif (metadata.language) {\n  lang = metadata.language.toLowerCase();\n}\n\nlet emailSubject, emailBody;\nif (lang === 'lv') {\n  emailSubject = '✅ Vizīte apstiprināta - Butkeviča Dental';\n  emailBody = 'Labdien, ' + customerName + '!\\n\\n' +\n    'Paldies par Jūsu maksājumu €' + amountPaid + ' apmērā!\\n\\n' +\n    'Jūsu zobārstniecības vizīte ir apstiprināta:\\n' +\n    '📅 Datums: ' + bookingDate + '\\n' +\n    '⏰ Laiks: ' + bookingTime + '\\n\\n' +\n    'Gaidīsim Jūs!\\n\\n' +\n    'Ar cieņu,\\n' +\n    'Butkeviča Dental Practice';\n} else {\n  emailSubject = '✅ Appointment Confirmed - Butkeviča Dental';\n  emailBody = 'Hi ' + customerName + ',\\n\\n' +\n    'Thank you for your payment of €' + amountPaid + '!\\n\\n' +\n    'Your dental appointment is confirmed:\\n' +\n    '📅 Date: ' + bookingDate + '\\n' +\n    '⏰ Time: ' + bookingTime + '\\n\\n' +\n    'We look forward to seeing you!\\n\\n' +\n    'Best regards,\\n' +\n    'Butkeviča Dental Practice';\n}\n\nconst bookingRef = 'BK-' + Date.now().toString(36).toUpperCase();\n\nconst result = {\n  customer_name: customerName,\n  customer_email: customerEmail,\n  phone: rawPhone,\n  service_id: metadata.service_id || null,\n  service_name: metadata.serviceName || 'Dental Appointment',\n  start_time: eventStart,\n  end_time: eventEnd,\n  amount_paid: parseFloat(amountPaid),\n  status: 'confirmed',\n  stripe_payment_id: dataObject.payment_intent || dataObject.id,\n  email_subject: emailSubject,\n  email_body: emailBody,\n  calendar_summary: 'Vizīte ' + bookingRef,\n  calendar_description: '📋 View full details in secure dashboard\\n\\n🔒 Patient information protected under GDPR Art. 9\\n\\n⏰ Duration: 1 hour',\n  calendar_start: eventStart,\n  calendar_end: eventEnd,\n  booking_ref: bookingRef\n};\n\nreturn [{ json: result }];"
+                "jsCode": "const item = $input.first();\nconst rawJson = item.json;\nconst eventData = rawJson.body || rawJson;\n\nif (eventData.type !== 'checkout.session.completed') {\n  return [];\n}\n\nconst dataObject = eventData?.data?.object || {};\nconst metadata = dataObject.metadata || {};\nconst customerDetails = dataObject.customer_details || {};\n\nconst customerName = customerDetails.name || metadata.customer_name || 'Valued Patient';\nlet customerEmail = customerDetails.email || metadata.customer_email || 'missing@error.com';\nconst rawPhone = customerDetails.phone || metadata.customer_phone || metadata.phone || '';\nconst amountPaid = ((dataObject.amount_total || 0) / 100).toFixed(2);\nconst bookingDate = metadata.booking_date;\nconst bookingTime = metadata.booking_time;\n\nlet eventStart = null;\nlet eventEnd = null;\nif (bookingDate && bookingTime) {\n  const startDate = new Date(bookingDate + 'T' + bookingTime + ':00');\n  eventStart = startDate.toISOString();\n  eventEnd = new Date(startDate.getTime() + 3600000).toISOString();\n}\n\nlet lang = 'lv';\nif (metadata.language) {\n  lang = metadata.language.toLowerCase();\n}\n\nlet emailSubject, emailBody;\nif (lang === 'lv') {\n  emailSubject = '✅ Vizīte apstiprināta - Butkeviča Dental';\n  emailBody = 'Labdien, ' + customerName + '!\\\\n\\\\n' +\n    'Paldies par Jūsu maksājumu €' + amountPaid + ' apmērā!\\\\n\\\\n' +\n    'Jūsu zobārstniecības vizīte ir apstiprināta:\\\\n' +\n    '📅 Datums: ' + bookingDate + '\\\\n' +\n    '⏰ Laiks: ' + bookingTime + '\\\\n\\\\n' +\n    'Gaidīsim Jūs!\\\\n\\\\n' +\n    'Ar cieņu,\\\\n' +\n    'Butkeviča Dental Practice';\n} else {\n  emailSubject = '✅ Appointment Confirmed - Butkeviča Dental';\n  emailBody = 'Hi ' + customerName + ',\\\\n\\\\n' +\n    'Thank you for your payment of €' + amountPaid + '!\\\\n\\\\n' +\n    'Your dental appointment is confirmed:\\\\n' +\n    '📅 Date: ' + bookingDate + '\\\\n' +\n    '⏰ Time: ' + bookingTime + '\\\\n\\\\n' +\n    'We look forward to seeing you!\\\\n\\\\n' +\n    'Best regards,\\\\n' +\n    'Butkeviča Dental Practice';\n}\n\nconst bookingRef = 'BK-' + Date.now().toString(36).toUpperCase();\n\nconst result = {\n  // Fields for Supabase insert (must match table columns exactly)\n  customer_name: customerName,\n  customer_email: customerEmail,\n  customer_phone: rawPhone || null,\n  service_id: metadata.service_id || null,\n  service_name: metadata.serviceName || 'Dental Appointment',\n  start_time: eventStart,\n  end_time: eventEnd,\n  amount_paid: parseFloat(amountPaid),\n  status: 'confirmed',\n  stripe_session_id: dataObject.id || null,\n  payment_intent_id: dataObject.payment_intent || null,\n  amount_cents: dataObject.amount_total || null,\n  currency: 'EUR',\n  client_reference: bookingRef,\n  // Extra fields for email/calendar (not inserted to DB)\n  email_subject: emailSubject,\n  email_body: emailBody,\n  calendar_summary: 'Vizīte ' + bookingRef,\n  calendar_description: '📋 View full details in secure dashboard\\\\n\\\\n🔒 Patient information protected under GDPR Art. 9\\\\n\\\\n⏰ Duration: 1 hour',\n  calendar_start: eventStart,\n  calendar_end: eventEnd,\n  booking_ref: bookingRef\n};\n\nreturn [{ json: result }];"
             },
             "name": "Extract Booking Data",
             "type": "n8n-nodes-base.code",
@@ -31,75 +31,82 @@
         },
         {
             "parameters": {
-                "operation": "insert",
-                "schema": {
-                    "__rl": true,
-                    "mode": "list",
-                    "value": "public"
-                },
-                "table": {
-                    "__rl": true,
-                    "value": "bookings",
-                    "mode": "list",
-                    "cachedResultName": "bookings"
-                },
-                "columns": {
-                    "mappingMode": "defineBelow",
-                    "value": {
-                        "customer_name": "={{ $json.customer_name }}",
-                        "customer_email": "={{ $json.customer_email }}",
-                        "start_time": "={{ $json.start_time }}",
-                        "end_time": "={{ $json.end_time }}",
-                        "status": "={{ $json.status }}"
-                    },
-                    "matchingColumns": [],
-                    "schema": [
+                "operation": "create",
+                "tableId": "bookings",
+                "fieldsUi": {
+                    "fieldValues": [
                         {
-                            "id": "customer_name",
-                            "displayName": "customer_name",
-                            "required": true,
-                            "type": "string"
+                            "fieldName": "customer_name",
+                            "fieldValue": "={{ $json.customer_name }}"
                         },
                         {
-                            "id": "customer_email",
-                            "displayName": "customer_email",
-                            "required": true,
-                            "type": "string"
+                            "fieldName": "customer_email",
+                            "fieldValue": "={{ $json.customer_email }}"
                         },
                         {
-                            "id": "start_time",
-                            "displayName": "start_time",
-                            "required": true,
-                            "type": "dateTime"
+                            "fieldName": "customer_phone",
+                            "fieldValue": "={{ $json.customer_phone }}"
                         },
                         {
-                            "id": "end_time",
-                            "displayName": "end_time",
-                            "required": true,
-                            "type": "dateTime"
+                            "fieldName": "service_id",
+                            "fieldValue": "={{ $json.service_id }}"
                         },
                         {
-                            "id": "status",
-                            "displayName": "status",
-                            "required": false,
-                            "type": "string"
+                            "fieldName": "service_name",
+                            "fieldValue": "={{ $json.service_name }}"
+                        },
+                        {
+                            "fieldName": "start_time",
+                            "fieldValue": "={{ $json.start_time }}"
+                        },
+                        {
+                            "fieldName": "end_time",
+                            "fieldValue": "={{ $json.end_time }}"
+                        },
+                        {
+                            "fieldName": "status",
+                            "fieldValue": "={{ $json.status }}"
+                        },
+                        {
+                            "fieldName": "amount_paid",
+                            "fieldValue": "={{ $json.amount_paid }}"
+                        },
+                        {
+                            "fieldName": "stripe_session_id",
+                            "fieldValue": "={{ $json.stripe_session_id }}"
+                        },
+                        {
+                            "fieldName": "payment_intent_id",
+                            "fieldValue": "={{ $json.payment_intent_id }}"
+                        },
+                        {
+                            "fieldName": "amount_cents",
+                            "fieldValue": "={{ $json.amount_cents }}"
+                        },
+                        {
+                            "fieldName": "currency",
+                            "fieldValue": "={{ $json.currency }}"
+                        },
+                        {
+                            "fieldName": "client_reference",
+                            "fieldValue": "={{ $json.client_reference }}"
                         }
                     ]
                 },
                 "options": {}
             },
-            "type": "n8n-nodes-base.postgres",
-            "typeVersion": 2.6,
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
             "position": [
                 250,
                 -48
             ],
-            "id": "f4547830-44c5-4e67-8ec7-f7d6515c0552",
-            "name": "Save to Database",
+            "id": "supabase-native-insert",
+            "name": "Save to Supabase",
             "credentials": {
-                "postgres": {
-                    "id": "GuG495s0j2amZHOv",
-                    "name": "Postgres account 2"
+                "supabaseApi": {
+                    "id": "YOUR_SUPABASE_CREDENTIAL_ID",
+                    "name": "Supabase account"
                 }
             },
             "onError": "stopWorkflow"
@@ -233,14 +240,14 @@
             "main": [
                 [
                     {
-                        "node": "Save to Database",
+                        "node": "Save to Supabase",
                         "type": "main",
                         "index": 0
                     }
                 ]
             ]
         },
-        "Save to Database": {
+        "Save to Supabase": {
             "main": [
                 [
                     {
