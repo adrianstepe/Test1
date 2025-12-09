@@ -1,6 +1,52 @@
 {
     "nodes": [
         {
+            "parameters": {},
+            "type": "n8n-nodes-base.errorTrigger",
+            "typeVersion": 1,
+            "position": [
+                -304,
+                576
+            ],
+            "id": "b4b25ad0-f347-4a64-a8ce-93c0ccb93403",
+            "name": "Error Trigger"
+        },
+        {
+            "parameters": {
+                "command": "=mkdir -p /home/node/.n8n/dlq && echo '{{ JSON.stringify({ timestamp: $now.toISO(), error: { message: String($json.error?.message || $json.message || \"Unknown error\").replace(/'/g, \"\"), node: $json.error?.node?.name || \"Unknown\" }, recovery_attempts: 0 }) }}' > /home/node/.n8n/dlq/failed-{{ $now.format('yyyyMMdd-HHmmss') }}.json && echo 'DLQ saved'"
+            },
+            "type": "n8n-nodes-base.executeCommand",
+            "typeVersion": 1,
+            "position": [
+                -80,
+                576
+            ],
+            "id": "dlq-write-file",
+            "name": "Save to DLQ"
+        },
+        {
+            "parameters": {
+                "chatId": "7408240811",
+                "text": "=🚨 BOOKING FAILED - DLQ ACTIVATED!\n\nWorkflow: {{ $workflow.name }}\nError: {{ $('Error Trigger').first().json.error?.message || $('Error Trigger').first().json.message || 'Unknown' }}\nNode: {{ $('Error Trigger').first().json.error?.node?.name || 'Unknown' }}\nTime: {{ $now.format('yyyy-MM-dd HH:mm:ss') }}\n\n📁 Saved to: /home/node/.n8n/dlq/\n\n⚠️ Check n8n immediately!",
+                "additionalFields": {}
+            },
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                144,
+                576
+            ],
+            "id": "453081d8-d96b-426e-8bcc-170393446084",
+            "name": "Send a text message",
+            "webhookId": "2859d6bd-c6bf-4b76-94be-fae004b7425e",
+            "credentials": {
+                "telegramApi": {
+                    "id": "O3M9P0psuAlOvjZg",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
             "parameters": {
                 "httpMethod": "POST",
                 "path": "stripe-confirmation-webhook",
@@ -9,10 +55,10 @@
             "type": "n8n-nodes-base.webhook",
             "typeVersion": 2,
             "position": [
-                -256,
-                -48
+                -304,
+                128
             ],
-            "id": "3236ed89-d5f5-40f3-9df3-3694384ae40b",
+            "id": "ff1eb819-1f8c-495a-841f-3648c35db86c",
             "name": "Webhook",
             "webhookId": "45c1830b-9364-4b68-9c7d-e8ea2dade456"
         },
@@ -24,14 +70,14 @@
             "type": "n8n-nodes-base.code",
             "typeVersion": 2,
             "position": [
-                0,
-                -48
+                -80,
+                128
             ],
-            "id": "dc471cbb-1e1a-4fb2-97af-9d76d46b6d13"
+            "id": "106266b2-c937-48c2-be16-c930ebd40b40",
+            "onError": "stopWorkflow"
         },
         {
             "parameters": {
-                "operation": "create",
                 "tableId": "bookings",
                 "fieldsUi": {
                     "fieldValues": [
@@ -92,20 +138,19 @@
                             "fieldValue": "={{ $json.client_reference }}"
                         }
                     ]
-                },
-                "options": {}
+                }
             },
             "type": "n8n-nodes-base.supabase",
             "typeVersion": 1,
             "position": [
-                250,
-                -48
+                144,
+                128
             ],
-            "id": "supabase-native-insert",
+            "id": "b53f7f91-cb39-44b5-a63c-439d2d77baaa",
             "name": "Save to Supabase",
             "credentials": {
                 "supabaseApi": {
-                    "id": "YOUR_SUPABASE_CREDENTIAL_ID",
+                    "id": "dlNOvdwAbyq59XOl",
                     "name": "Supabase account"
                 }
             },
@@ -123,10 +168,11 @@
             "type": "n8n-nodes-base.gmail",
             "typeVersion": 2.1,
             "position": [
-                500,
-                -48
+                368,
+                128
             ],
-            "id": "ff881ec9-33dc-42b4-b4eb-1144aa237f61",
+            "id": "f5775b03-75b3-49ae-9d0b-01ec920f139f",
+            "webhookId": "5db0aaec-24c1-405f-b15d-d9a2b0c3f67a",
             "credentials": {
                 "gmailOAuth2": {
                     "id": "bsHsQyITlAn3DBQk",
@@ -145,17 +191,17 @@
                 "start": "={{ $('Extract Booking Data').first().json.calendar_start }}",
                 "end": "={{ $('Extract Booking Data').first().json.calendar_end }}",
                 "additionalFields": {
-                    "summary": "={{ $('Extract Booking Data').first().json.calendar_summary }}",
-                    "description": "={{ $('Extract Booking Data').first().json.calendar_description }}"
+                    "description": "={{ $('Extract Booking Data').first().json.calendar_description }}",
+                    "summary": "={{ $('Extract Booking Data').first().json.calendar_summary }}"
                 }
             },
-            "id": "calendar-stripe-flow",
+            "id": "e3d5b616-31cb-4d26-9d2a-a7ec03d639d0",
             "name": "Add to Calendar",
             "type": "n8n-nodes-base.googleCalendar",
             "typeVersion": 1,
             "position": [
-                750,
-                -48
+                592,
+                128
             ],
             "credentials": {
                 "googleCalendarOAuth2Api": {
@@ -171,13 +217,13 @@
                 "path": "manual-calendar-sync",
                 "options": {}
             },
-            "id": "63c5bb28-1b05-4583-b1e3-2ae5ffe5aff5",
+            "id": "d8fa502f-a597-4d10-9d19-960891af75fc",
             "name": "Manual Webhook",
             "type": "n8n-nodes-base.webhook",
             "typeVersion": 2,
             "position": [
-                -176,
-                200
+                -304,
+                352
             ],
             "webhookId": "60860d87-19b1-4f7e-8637-ccd82a74e333"
         },
@@ -185,13 +231,13 @@
             "parameters": {
                 "jsCode": "const body = $input.first().json.body || $input.first().json;\n\nif (!body.booking_date || !body.booking_time) {\n  throw new Error('Missing Date or Time');\n}\n\nconst startDate = new Date(body.booking_date + 'T' + body.booking_time + ':00');\nconst endDate = new Date(startDate.getTime() + 3600000);\nconst bookingRef = body.booking_id ? '#' + body.booking_id : 'BK-' + Date.now().toString(36).toUpperCase();\n\nconst result = {\n  event_start: startDate.toISOString(),\n  event_end: endDate.toISOString(),\n  summary: 'Vizite ' + bookingRef,\n  description: 'View details in dashboard'\n};\n\nreturn [{ json: result }];"
             },
-            "id": "5f5b276e-80e9-46a6-9489-d6c278e06be0",
+            "id": "aa8229a0-4b16-4db3-8c02-1532fa373d14",
             "name": "Format Manual Data",
             "type": "n8n-nodes-base.code",
             "typeVersion": 2,
             "position": [
-                100,
-                200
+                -80,
+                352
             ]
         },
         {
@@ -204,17 +250,17 @@
                 "start": "={{ $json.event_start }}",
                 "end": "={{ $json.event_end }}",
                 "additionalFields": {
-                    "summary": "={{ $json.summary }}",
-                    "description": "={{ $json.description }}"
+                    "description": "={{ $json.description }}",
+                    "summary": "={{ $json.summary }}"
                 }
             },
-            "id": "6ade1abc-a235-473c-a05c-9fc26b9e996c",
+            "id": "36f90f08-fb58-456a-ae0b-2d3641fe2661",
             "name": "Manual Calendar",
             "type": "n8n-nodes-base.googleCalendar",
             "typeVersion": 1,
             "position": [
-                350,
-                200
+                144,
+                352
             ],
             "credentials": {
                 "googleCalendarOAuth2Api": {
@@ -225,6 +271,28 @@
         }
     ],
     "connections": {
+        "Error Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Save to DLQ",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Save to DLQ": {
+            "main": [
+                [
+                    {
+                        "node": "Send a text message",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
         "Webhook": {
             "main": [
                 [
