@@ -111,22 +111,13 @@
                 "additionalFields": {
                     "description": "={{ $('Extract Booking Data').first().json.calendar_description }}",
                     "summary": "={{ $('Extract Booking Data').first().json.calendar_summary }}",
-                    "reminders": {
-                        "remindersUi": {
-                            "remindersValues": [
-                                {
-                                    "method": "popup",
-                                    "minutes": 120
-                                }
-                            ]
-                        }
-                    }
+                    "useDefaultReminders": true
                 }
             },
             "id": "e9b3bb9c-4a16-4cae-9e1e-0951432c8a4c",
             "name": "Add to Calendar",
             "type": "n8n-nodes-base.googleCalendar",
-            "typeVersion": 1,
+            "typeVersion": 1.3,
             "position": [
                 544,
                 -240
