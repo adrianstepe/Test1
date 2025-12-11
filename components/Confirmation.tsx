@@ -47,47 +47,38 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
     };
   };
 
-  const [syncLoading, setSyncLoading] = React.useState(false);
+  const addToGoogleCalendar = () => {
+    // Generate a Google Calendar link for the patient to add the appointment to their own calendar
+    // Note: We cannot automatically add to a user's calendar without their OAuth consent
+    // The standard approach is to open a pre-filled Google Calendar URL
 
-  const addToGoogleCalendar = async () => {
-    // 1. Validation
-    if (!booking.selectedDate || !booking.patientData.email) {
+    const eventDetails = getEventDetails();
+    if (!eventDetails) {
       alert('Booking data missing. Please refresh');
       return;
     }
 
-    if (syncLoading) return;
-    setSyncLoading(true);
+    // Format dates for Google Calendar URL (YYYYMMDDTHHmmss format)
+    const formatGoogleDate = (date: Date): string => {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
 
-    try {
-      // Use the actual n8n instance URL
-      const webhookUrl = "https://n8n.srv1152467.hstgr.cloud/webhook/manual-calendar-sync";
+    const startStr = formatGoogleDate(eventDetails.start);
+    const endStr = formatGoogleDate(eventDetails.end);
 
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          customer_name: `${booking.patientData.firstName} ${booking.patientData.lastName}`,
-          customer_email: booking.patientData.email,
-          service_name: booking.selectedService?.name[language],
-          // Fix Timezone: Send local YYYY-MM-DD
-          booking_date: new Date(booking.selectedDate).toLocaleDateString('en-CA'),
-          booking_time: booking.selectedTime
-        })
-      });
+    // Clinic address for location
+    const clinicAddress = 'Dzirnavu iela 62A, Centra rajons, Rīga, LV-1050';
 
-      if (response.ok) {
-        alert(texts.calendarAdded[language] || "Added to Calendar!");
-      } else {
-        console.error("Failed to sync calendar");
-      }
-    } catch (error) {
-      console.error("Error syncing calendar:", error);
-    } finally {
-      setSyncLoading(false);
-    }
+    // Build the Google Calendar URL
+    const calendarUrl = new URL('https://calendar.google.com/calendar/render');
+    calendarUrl.searchParams.set('action', 'TEMPLATE');
+    calendarUrl.searchParams.set('text', eventDetails.title);
+    calendarUrl.searchParams.set('dates', `${startStr}/${endStr}`);
+    calendarUrl.searchParams.set('details', eventDetails.description);
+    calendarUrl.searchParams.set('location', clinicAddress);
+
+    // Open in new tab - user will see their Google Calendar with the event pre-filled
+    window.open(calendarUrl.toString(), '_blank');
   };
 
   return (
@@ -127,10 +118,9 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
       <div className="space-y-3">
         <button
           onClick={addToGoogleCalendar}
-          disabled={syncLoading}
-          className={`w-full max-w-xs mx-auto block py-3 px-4 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 ${syncLoading ? 'opacity-50 cursor-wait' : ''}`}
+          className="w-full max-w-xs mx-auto block py-3 px-4 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800"
         >
-          📅 {syncLoading ? 'Syncing...' : `${texts.addToCalendar[language]} (Google)`}
+          📅 {texts.addToCalendar[language]} (Google)
         </button>
       </div>
     </div>
