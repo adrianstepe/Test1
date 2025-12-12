@@ -67,7 +67,7 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
     const endStr = formatGoogleDate(eventDetails.end);
 
     // Clinic address for location
-    const clinicAddress = 'Dzirnavu iela 62A, Centra rajons, Rīga, LV-1050';
+    const clinicAddress = 'Dzirnavu iela 45, Centra rajons, Rīga, LV-1010';
 
     // Build the Google Calendar URL
     const calendarUrl = new URL('https://calendar.google.com/calendar/render');
@@ -109,7 +109,7 @@ const Confirmation: React.FC<ConfirmationProps> = ({ language, booking }) => {
             <span className="font-medium text-gray-900 dark:text-white text-right">{booking.selectedDate?.toLocaleDateString()}</span>
           </div>
           <div className="flex justify-between gap-4">
-            <span className="text-gray-500 dark:text-gray-400 text-sm">Time</span>
+            <span className="text-gray-500 dark:text-gray-400 text-sm">{texts.timeLabel[language]}</span>
             <span className="font-medium text-gray-900 dark:text-white text-right">{booking.selectedTime}</span>
           </div>
         </div>

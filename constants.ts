@@ -112,6 +112,7 @@ export const SPECIALISTS: Specialist[] = [
 
 export const TEXTS: Translations = {
   headerTitle: { [Language.EN]: 'Book Appointment', [Language.LV]: 'Pieteikt Vizīti', [Language.RU]: 'Записаться' },
+  dentalClinic: { [Language.EN]: 'Dental Clinic', [Language.LV]: 'Zobārstniecības Klīnika', [Language.RU]: 'Стоматологическая Клиника' },
   stepService: { [Language.EN]: 'Service', [Language.LV]: 'Pakalpojums', [Language.RU]: 'Услуга' },
   stepDate: { [Language.EN]: 'Date & Time', [Language.LV]: 'Datums un Laiks', [Language.RU]: 'Дата и время' },
   stepDetails: { [Language.EN]: 'Details', [Language.LV]: 'Dati', [Language.RU]: 'Детали' },
@@ -119,6 +120,8 @@ export const TEXTS: Translations = {
   next: { [Language.EN]: 'Next Step', [Language.LV]: 'Tālāk', [Language.RU]: 'Далее' },
   back: { [Language.EN]: 'Back', [Language.LV]: 'Atpakaļ', [Language.RU]: 'Назад' },
   selectService: { [Language.EN]: 'Select a Service', [Language.LV]: 'Izvēlieties pakalpojumu', [Language.RU]: 'Выберите услугу' },
+  selectServiceDesc: { [Language.EN]: 'Choose a treatment to view availability and pricing.', [Language.LV]: 'Izvēlieties ārstēšanu, lai redzētu pieejamību un cenas.', [Language.RU]: 'Выберите процедуру, чтобы увидеть доступность и цены.' },
+  selectBtn: { [Language.EN]: 'Select', [Language.LV]: 'Izvēlēties', [Language.RU]: 'Выбрать' },
   selectSpecialist: { [Language.EN]: 'Select a Specialist', [Language.LV]: 'Izvēlieties speciālistu', [Language.RU]: 'Выберите специалиста' },
   anySpecialist: { [Language.EN]: 'Any Available Specialist', [Language.LV]: 'Jebkurš pieejams speciālists', [Language.RU]: 'Любой доступный специалист' },
   morning: { [Language.EN]: 'Morning', [Language.LV]: 'Rīts', [Language.RU]: 'Утро' },

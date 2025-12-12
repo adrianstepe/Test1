@@ -1,5 +1,6 @@
 import React from 'react';
 import { Language } from '../types';
+import { useTexts } from '../hooks/useConfig';
 
 interface HeaderProps {
   currentLanguage: Language;
@@ -9,6 +10,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ currentLanguage, setLanguage, theme, toggleTheme }) => {
+  const texts = useTexts();
   return (
     <header className="flex justify-between items-center p-4 border-b bg-white dark:bg-slate-800 dark:border-slate-700 sticky top-0 z-50 shadow-sm transition-colors duration-300">
       <div className="flex items-center space-x-2">
@@ -17,7 +19,7 @@ const Header: React.FC<HeaderProps> = ({ currentLanguage, setLanguage, theme, to
         </div>
         <div>
           <h1 className="text-lg font-bold text-secondary dark:text-white leading-tight hidden sm:block">Butkeviča</h1>
-          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:block">Dental Clinic</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:block">{texts.dentalClinic[currentLanguage]}</p>
         </div>
       </div>
 
