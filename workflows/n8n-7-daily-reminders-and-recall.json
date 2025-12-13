@@ -199,7 +199,7 @@
             "parameters": {
                 "sendTo": "={{ $json.patient_email }}",
                 "subject": "Atgādinājums: Jūsu 6 mēnešu smaida pārbaude",
-                "message": "<p>Sveiki, {{ $json.patient_name }}!</p>\n\n<p>Ir pagājuši 6 mēneši kopš Jūsu pēdējās vizītes. Lai smaids būtu vesels, ārsti rekomendē veikt pārbaudi un higiēnu reizi pusgadā.</p>\n\n<p>Mēs labprāt Jūs pierakstītu uz vizīti nākamajā mēnesī.</p>\n\n<p>📅 <b>Rezervējiet sev ērtu laiku šeit:</b> <a href=\"https://butkevica-dental-booking.pages.dev\">Pieteikt Vizīti</a></p>\n\n<p>Uz drīzu tikšanos,<br>\nButkeviča Dental Practice</p>",
+                "message": "<p>Sveiki, {{ $json.patient_name }}!</p>\n\n<p>Ir pagājuši 6 mēneši kopš Jūsu pēdējās vizītes. Lai smaids būtu vesels, ārsti rekomendē veikt pārbaudi un higiēnu reizi pusgadā.</p>\n\n<p>Mēs labprāt Jūs pierakstītu uz vizīti nākamajā mēnesī.</p>\n\n<p>📅 <b>Rezervējiet sev ērtu laiku šeit:</b> <a href=\"https://test1-3oj.pages.dev\">Pieteikt Vizīti</a></p>\n\n<p>Uz drīzu tikšanos,<br>\nButkeviča Dental Practice</p>",
                 "options": {}
             },
             "id": "15bbfedc-9200-4da0-923b-97d40fff8e3e",
@@ -223,7 +223,7 @@
             "parameters": {
                 "sendTo": "={{ $json.patient_email }}",
                 "subject": "Reminder: Your 6-Month Dental Checkup",
-                "message": "<p>Hello, {{ $json.patient_name }}!</p>\n\n<p>It's been 6 months since your last visit. Dentists recommend a checkup and hygiene appointment every 6 months for optimal oral health.</p>\n\n<p>We'd love to schedule your next appointment!</p>\n\n<p>📅 <b>Book your convenient time here:</b> <a href=\"https://butkevica-dental-booking.pages.dev\">Book Appointment</a></p>\n\n<p>Looking forward to seeing you,<br>\nButkeviča Dental Practice</p>",
+                "message": "<p>Hello, {{ $json.patient_name }}!</p>\n\n<p>It's been 6 months since your last visit. Dentists recommend a checkup and hygiene appointment every 6 months for optimal oral health.</p>\n\n<p>We'd love to schedule your next appointment!</p>\n\n<p>📅 <b>Book your convenient time here:</b> <a href=\"https://test1-3oj.pages.dev\">Book Appointment</a></p>\n\n<p>Looking forward to seeing you,<br>\nButkeviča Dental Practice</p>",
                 "options": {}
             },
             "id": "adff4a6a-ac9d-4c4b-96be-aaa42f7f4bdc",
