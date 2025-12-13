@@ -44,7 +44,8 @@ export async function onRequestGet(context) {
         );
 
         if (!response.ok) {
-            throw new Error('Failed to fetch booking');
+            const errorBody = await response.text();
+            throw new Error(`Supabase error: ${response.status} - ${errorBody}`);
         }
 
         const bookings = await response.json();
