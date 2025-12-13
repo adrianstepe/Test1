@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -227,7 +228,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .result {
@@ -304,6 +307,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <!-- Loading State -->
@@ -362,12 +366,14 @@
                     <span class="icon">⚠️</span>
                     <div class="text">
                         <strong id="noRefundTitle">Refund Not Available</strong>
-                        <span id="noRefundDesc">Cancellations less than 24h before the appointment are not eligible for refund.</span>
+                        <span id="noRefundDesc">Cancellations less than 24h before the appointment are not eligible for
+                            refund.</span>
                     </div>
                 </div>
 
                 <div class="warning-box">
-                    <p id="warningText">⚠️ This action cannot be undone. Your appointment will be permanently cancelled.</p>
+                    <p id="warningText">⚠️ This action cannot be undone. Your appointment will be permanently cancelled.
+                    </p>
                 </div>
 
                 <div id="errorMessage" class="error-message"></div>
@@ -421,6 +427,7 @@
                 successTitle: 'Appointment Cancelled',
                 successDesc: 'Your appointment has been cancelled. You will receive a confirmation email shortly.',
                 successDescRefund: 'Your appointment has been cancelled and your deposit will be refunded within 5-10 business days.',
+                successDescNoRefund: 'Your appointment has been cancelled. Due to the 24-hour cancellation policy, the deposit is non-refundable.',
                 homeBtn: 'Return to Home',
                 errorTitle: 'Error',
                 loadingText: 'Loading appointment details...',
@@ -445,6 +452,7 @@
                 successTitle: 'Vizīte Atcelta',
                 successDesc: 'Jūsu vizīte ir atcelta. Jūs drīzumā saņemsiet apstiprinājuma e-pastu.',
                 successDescRefund: 'Jūsu vizīte ir atcelta un depozīts tiks atmaksāts 5-10 darba dienu laikā.',
+                successDescNoRefund: 'Jūsu vizīte ir atcelta. Saskaņā ar 24 stundu atcelšanas politiku, depozīts netiek atmaksāts.',
                 homeBtn: 'Atgriezties Sākumā',
                 errorTitle: 'Kļūda',
                 loadingText: 'Ielādē vizītes informāciju...',
@@ -469,6 +477,7 @@
                 successTitle: 'Запись Отменена',
                 successDesc: 'Ваша запись отменена. Вы скоро получите подтверждение по email.',
                 successDescRefund: 'Ваша запись отменена, и депозит будет возвращён в течение 5-10 рабочих дней.',
+                successDescNoRefund: 'Ваша запись отменена. В соответствии с политикой отмены за 24 часа, депозит не подлежит возврату.',
                 homeBtn: 'На Главную',
                 errorTitle: 'Ошибка',
                 loadingText: 'Загрузка информации о записи...',
@@ -542,7 +551,7 @@
 
                 bookingData = data;
                 displayBookingDetails(data);
-                
+
             } catch (error) {
                 showError(error.message || translations[currentLang].invalidToken);
             }
@@ -558,11 +567,11 @@
             const timeOptions = { hour: '2-digit', minute: '2-digit' };
 
             document.getElementById('bookingDate').textContent = startTime.toLocaleDateString(
-                currentLang === 'lv' ? 'lv-LV' : currentLang === 'ru' ? 'ru-RU' : 'en-US', 
+                currentLang === 'lv' ? 'lv-LV' : currentLang === 'ru' ? 'ru-RU' : 'en-US',
                 dateOptions
             );
             document.getElementById('bookingTime').textContent = startTime.toLocaleTimeString(
-                currentLang === 'lv' ? 'lv-LV' : currentLang === 'ru' ? 'ru-RU' : 'en-US', 
+                currentLang === 'lv' ? 'lv-LV' : currentLang === 'ru' ? 'ru-RU' : 'en-US',
                 timeOptions
             );
             document.getElementById('bookingService').textContent = data.service_name || 'Dental Service';
@@ -607,13 +616,20 @@
                     throw new Error(data.error || 'Cancellation failed');
                 }
 
-                // Show success
+                // Show success - use API response for refund eligibility
+                const refundEligibleFromApi = data.refund_eligible;
+
                 document.getElementById('mainContent').style.display = 'none';
                 document.getElementById('successResult').classList.add('active');
-                
+
                 const t = translations[currentLang];
                 document.getElementById('successTitle').textContent = t.successTitle;
-                document.getElementById('successDesc').textContent = isRefundEligible ? t.successDescRefund : t.successDesc;
+                // Show appropriate message based on actual refund eligibility from API
+                if (refundEligibleFromApi) {
+                    document.getElementById('successDesc').textContent = t.successDescRefund;
+                } else {
+                    document.getElementById('successDesc').textContent = t.successDescNoRefund;
+                }
                 document.getElementById('homeBtn').textContent = t.homeBtn;
 
             } catch (error) {
@@ -631,4 +647,5 @@
         }
     </script>
 </body>
+
 </html>
