@@ -4,82 +4,92 @@ export const SERVICES: Service[] = [
   {
     id: 's1',
     name: { [Language.EN]: 'Integrated Teeth and Oral Cavity Test', [Language.LV]: 'Integrēta zobu un mutes dobuma pārbaude', [Language.RU]: 'Комплексное обследование зубов и полости рта' },
-    description: { [Language.EN]: 'Comprehensive diagnostic check-up and plan.', [Language.LV]: 'Visaptveroša diagnostika un plāns.', [Language.RU]: 'Комплексная диагностика и план.' },
+    description: { [Language.EN]: 'Full mouth examination with X-rays and personalized treatment plan.', [Language.LV]: 'Pilna mutes dobuma izmeklēšana ar rentgenu un individuāls ārstēšanas plāns.', [Language.RU]: 'Полное обследование полости рта с рентгеном и индивидуальный план лечения.' },
     price: 50,
     durationMinutes: 45,
-    icon: ''
+    icon: '🔍',
+    category: 'preventive'
   },
   {
     id: 's2',
     name: { [Language.EN]: 'Check-Ups and Dental Hygiene', [Language.LV]: 'Pārbaudes un zobu higiēna', [Language.RU]: 'Осмотры и гигиена зубов' },
-    description: { [Language.EN]: 'Professional cleaning and routine exam.', [Language.LV]: 'Profesionāla tīrīšana un kārtējā pārbaude.', [Language.RU]: 'Профессиональная чистка и осмотр.' },
+    description: { [Language.EN]: 'Routine examination, professional cleaning, and plaque removal.', [Language.LV]: 'Kārtējā pārbaude, profesionālā tīrīšana un aplikuma noņemšana.', [Language.RU]: 'Плановый осмотр, профессиональная чистка и удаление налёта.' },
     price: 65,
     durationMinutes: 60,
-    icon: ''
+    icon: '✨',
+    category: 'preventive'
   },
   {
     id: 's3',
-    name: { [Language.EN]: 'Children’s Dentistry', [Language.LV]: 'Bērnu zobārstniecība', [Language.RU]: 'Детская стоматология' },
-    description: { [Language.EN]: 'Gentle care for young patients.', [Language.LV]: 'Maiga aprūpe mazajiem pacientiem.', [Language.RU]: 'Бережный уход за маленькими пациентами.' },
+    name: { [Language.EN]: "Children's Dentistry (up to 14 years)", [Language.LV]: 'Bērnu zobārstniecība (līdz 14 gadiem)', [Language.RU]: 'Детская стоматология (до 14 лет)' },
+    description: { [Language.EN]: 'Gentle, kid-friendly care with patience and fun.', [Language.LV]: 'Maiga, bērniem draudzīga aprūpe ar pacietību un jautrību.', [Language.RU]: 'Бережный, дружелюбный к детям уход с терпением и весельем.' },
     price: 45,
     durationMinutes: 30,
-    icon: ''
+    icon: '👶',
+    category: 'children'
   },
   {
     id: 's4',
     name: { [Language.EN]: 'Dental Treatment', [Language.LV]: 'Zobu ārstēšana', [Language.RU]: 'Лечение зубов' },
-    description: { [Language.EN]: 'Caries treatment and fillings.', [Language.LV]: 'Kariesa ārstēšana un plombēšana.', [Language.RU]: 'Лечение кариеса и пломбирование.' },
+    description: { [Language.EN]: 'For cavities, toothaches, or broken teeth. Fillings and repairs.', [Language.LV]: 'Kariesa, zobu sāpju vai bojātu zobu ārstēšana. Plombēšana un remonts.', [Language.RU]: 'При кариесе, зубной боли или сломанных зубах. Пломбы и ремонт.' },
     price: 60,
     durationMinutes: 60,
-    icon: ''
+    icon: '🦷',
+    category: 'treatment'
   },
   {
     id: 's5',
-    name: { [Language.EN]: 'Sedative treatment', [Language.LV]: 'Ārstēšana sedācijā', [Language.RU]: 'Лечение под седацией' },
-    description: { [Language.EN]: 'Anxiety-free treatment options.', [Language.LV]: 'Ārstēšana bez stresa un raizēm.', [Language.RU]: 'Лечение без стресса и тревоги.' },
+    name: { [Language.EN]: 'Sedative Treatment', [Language.LV]: 'Ārstēšana sedācijā', [Language.RU]: 'Лечение под седацией' },
+    description: { [Language.EN]: 'Relaxed, anxiety-free dental care. Ideal for dental phobia.', [Language.LV]: 'Relaksēta, bez stresa zobārstniecība. Ideāli zobārsta fobijai.', [Language.RU]: 'Расслабленное лечение без тревоги. Идеально при страхе стоматолога.' },
     price: 100,
     durationMinutes: 60,
-    icon: ''
+    icon: '😴',
+    category: 'treatment'
   },
   {
     id: 's6',
     name: { [Language.EN]: 'Teeth Whitening', [Language.LV]: 'Zobu balināšana', [Language.RU]: 'Отбеливание зубов' },
-    description: { [Language.EN]: 'Professional whitening for a brighter smile.', [Language.LV]: 'Profesionāla balināšana mirdzošam smaidam.', [Language.RU]: 'Профессиональное отбеливание.' },
+    description: { [Language.EN]: 'Professional whitening for a brighter, whiter smile.', [Language.LV]: 'Profesionāla balināšana spožākam, baltākam smaidam.', [Language.RU]: 'Профессиональное отбеливание для яркой белоснежной улыбки.' },
     price: 250,
     durationMinutes: 90,
-    icon: ''
+    icon: '💎',
+    category: 'treatment'
   },
   {
     id: 's7',
     name: { [Language.EN]: 'Surgery', [Language.LV]: 'Ķirurģija', [Language.RU]: 'Хирургия' },
-    description: { [Language.EN]: 'Extractions and surgical procedures.', [Language.LV]: 'Zobu raušana un ķirurģija.', [Language.RU]: 'Удаление и хирургические процедуры.' },
+    description: { [Language.EN]: 'Tooth extractions and minor surgical procedures.', [Language.LV]: 'Zobu izraušana un nelielas ķirurģiskas procedūras.', [Language.RU]: 'Удаление зубов и небольшие хирургические процедуры.' },
     price: 120,
     durationMinutes: 60,
-    icon: ''
+    icon: '⚕️',
+    category: 'surgery'
   },
   {
     id: 's8',
     name: { [Language.EN]: 'Prosthetics', [Language.LV]: 'Protezēšana', [Language.RU]: 'Протезирование' },
-    description: { [Language.EN]: 'Crowns, bridges, and dentures.', [Language.LV]: 'Kroņi, tilti un protēzes.', [Language.RU]: 'Коронки, мосты и протезы.' },
+    description: { [Language.EN]: 'Crowns, bridges, and dentures to restore your smile.', [Language.LV]: 'Kroņi, tilti un protēzes smaida atjaunošanai.', [Language.RU]: 'Коронки, мосты и протезы для восстановления улыбки.' },
     price: 400,
     durationMinutes: 60,
-    icon: ''
+    icon: '👑',
+    category: 'prosthetics'
   },
   {
     id: 's9',
     name: { [Language.EN]: 'Implantology', [Language.LV]: 'Implantoloģija', [Language.RU]: 'Имплантология' },
-    description: { [Language.EN]: 'Restoring missing teeth with implants.', [Language.LV]: 'Zobu atjaunošana ar implantiem.', [Language.RU]: 'Восстановление зубов имплантами.' },
+    description: { [Language.EN]: 'Permanent tooth replacement with dental implants.', [Language.LV]: 'Pastāvīga zobu aizstāšana ar zobārstniecības implantiem.', [Language.RU]: 'Постоянное замещение зубов с помощью имплантов.' },
     price: 750,
     durationMinutes: 90,
-    icon: ''
+    icon: '🔩',
+    category: 'surgery'
   },
   {
     id: 's10',
     name: { [Language.EN]: 'Restoration of Jaw Bone Tissues', [Language.LV]: 'Žokļa kaula audu atjaunošana', [Language.RU]: 'Восстановление костной ткани челюсти' },
-    description: { [Language.EN]: 'Bone augmentation and reconstruction.', [Language.LV]: 'Kaula audzēšana un rekonstrukcija.', [Language.RU]: 'Наращивание и реконструкция кости.' },
+    description: { [Language.EN]: 'Bone grafting to prepare for implants or restore structure.', [Language.LV]: 'Kaula transplantācija implantu sagatavošanai vai struktūras atjaunošanai.', [Language.RU]: 'Костная пластика для подготовки к имплантам или восстановления структуры.' },
     price: 500,
     durationMinutes: 90,
-    icon: ''
+    icon: '🦴',
+    category: 'surgery'
   }
 ];
 
@@ -165,4 +175,19 @@ export const TEXTS: Translations = {
   allBooked: { [Language.EN]: 'All slots are fully booked.', [Language.LV]: 'Visi laiki ir aizņemti.', [Language.RU]: 'Все слоты заняты.' },
   checkingAvailability: { [Language.EN]: 'Checking availability...', [Language.LV]: 'Pārbauda pieejamību...', [Language.RU]: 'Проверка доступности...' },
   findingSlot: { [Language.EN]: 'Finding next available...', [Language.LV]: 'Meklē tuvāko pieejamo...', [Language.RU]: 'Поиск ближайшего...' },
+  categoryPreventive: { [Language.EN]: 'Preventive Care', [Language.LV]: 'Regulārā aprūpe', [Language.RU]: 'Профилактика' },
+  categoryChildren: { [Language.EN]: 'Children', [Language.LV]: 'Bērniem', [Language.RU]: 'Детская' },
+  categoryTreatment: { [Language.EN]: 'Treatment', [Language.LV]: 'Ārstēšana', [Language.RU]: 'Лечение' },
+  categorySurgery: { [Language.EN]: 'Surgery & Implants', [Language.LV]: 'Ķirurģija un Implanti', [Language.RU]: 'Хирургия и Имплантация' },
+  categoryProsthetics: { [Language.EN]: 'Prosthetics', [Language.LV]: 'Protezēšana', [Language.RU]: 'Протезирование' },
+  helpMeChoose: { [Language.EN]: "I'm in Pain / Help Me Choose", [Language.LV]: 'Man sāp / Palīdziet izvēlēties', [Language.RU]: 'У меня болит / Помогите выбрать' },
+  helpMeChooseDesc: { [Language.EN]: "Not sure what you need? Book a consultation and we'll help.", [Language.LV]: 'Nezināt, kas jums vajadzīgs? Piesakieties konsultācijai un mēs palīdzēsim.', [Language.RU]: 'Не знаете, что вам нужно? Запишитесь на консультацию, и мы поможем.' },
+  priceTooltip: { [Language.EN]: 'Final price depends on treatment complexity and materials used.', [Language.LV]: 'Galīgā cena atkarīga no ārstēšanas sarežģītības un izmantotajiem materiāliem.', [Language.RU]: 'Окончательная цена зависит от сложности лечения и материалов.' },
+  popularBadge: { [Language.EN]: 'Popular', [Language.LV]: 'Populārs', [Language.RU]: 'Популярное' },
+  trustSignal: { [Language.EN]: 'Free cancellation up to 24h before appointment', [Language.LV]: 'Bezmaksas atcelšana līdz 24h pirms vizītes', [Language.RU]: 'Бесплатная отмена за 24ч до визита' },
+  timePeriodMorning: { [Language.EN]: 'Morning', [Language.LV]: 'Rīts', [Language.RU]: 'Утро' },
+  timePeriodAfternoon: { [Language.EN]: 'Afternoon', [Language.LV]: 'Diena', [Language.RU]: 'День' },
+  timePeriodEvening: { [Language.EN]: 'Evening', [Language.LV]: 'Vakars', [Language.RU]: 'Вечер' },
+  slotsAvailable: { [Language.EN]: 'slots', [Language.LV]: 'laiki', [Language.RU]: 'слотов' },
+  yourAppointment: { [Language.EN]: 'Your appointment', [Language.LV]: 'Jūsu vizīte', [Language.RU]: 'Ваша запись' },
 };

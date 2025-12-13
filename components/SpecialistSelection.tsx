@@ -363,7 +363,7 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
         </div>
       </div>
 
-      {/* Time Slots - Polished styling */}
+      {/* Time Slots */}
       <div>
         {loading ? (
           <div className="text-center py-8">
@@ -379,11 +379,9 @@ const SpecialistSelection: React.FC<SpecialistSelectionProps> = ({
                   disabled={!slot.available}
                   onClick={() => onSelectTime(slot.time)}
                   className={`py-3 px-2 rounded-xl text-sm font-medium transition-all ${!slot.available
-                    // Disabled: No strikethrough, just light gray text and very subtle background
                     ? 'bg-gray-50 dark:bg-slate-800/30 text-gray-300 dark:text-slate-600 cursor-not-allowed'
                     : selectedTime === slot.time
                       ? 'bg-primary text-white shadow-md'
-                      // Available: Soft background fill, very light border
                       : 'bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-100 dark:border-slate-700 hover:border-primary hover:bg-white dark:hover:bg-slate-700'
                     }`}
                 >

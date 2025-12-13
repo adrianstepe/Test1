@@ -4,6 +4,8 @@ export enum Language {
   RU = 'RU'
 }
 
+export type ServiceCategory = 'preventive' | 'children' | 'treatment' | 'surgery' | 'prosthetics';
+
 export interface Service {
   id: string;
   name: Record<Language, string>;
@@ -11,6 +13,7 @@ export interface Service {
   price: number;
   durationMinutes: number;
   icon: string;
+  category: ServiceCategory;
 }
 
 export interface Specialist {

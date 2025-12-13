@@ -1,5 +1,5 @@
-import React from 'react';
-import { Service, Language } from '../types';
+import React, { useMemo, useState } from 'react';
+import { Service, Language, ServiceCategory } from '../types';
 import { useConfig } from '../hooks/useConfig';
 
 interface ServiceSelectionProps {
@@ -8,8 +8,42 @@ interface ServiceSelectionProps {
   onSelect: (service: Service) => void;
 }
 
+// Define category display order
+const CATEGORY_ORDER: ServiceCategory[] = ['preventive', 'children', 'treatment', 'surgery', 'prosthetics'];
+
+// Map categories to translation keys
+const CATEGORY_LABELS: Record<ServiceCategory, string> = {
+  preventive: 'categoryPreventive',
+  children: 'categoryChildren',
+  treatment: 'categoryTreatment',
+  surgery: 'categorySurgery',
+  prosthetics: 'categoryProsthetics',
+};
+
+
+
 const ServiceSelection: React.FC<ServiceSelectionProps> = ({ language, selectedService, onSelect }) => {
   const { services, texts, isLoading } = useConfig();
+  const [showPriceTooltip, setShowPriceTooltip] = useState<string | null>(null);
+
+  // Group services by category
+  const groupedServices = useMemo(() => {
+    const groups: Record<ServiceCategory, Service[]> = {
+      preventive: [],
+      children: [],
+      treatment: [],
+      surgery: [],
+      prosthetics: [],
+    };
+
+    services.forEach((service) => {
+      if (service.category && groups[service.category]) {
+        groups[service.category].push(service);
+      }
+    });
+
+    return groups;
+  }, [services]);
 
   if (isLoading) {
     return (
@@ -22,51 +56,133 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({ language, selectedS
 
   return (
     <div className="animate-fade-in w-full">
+      {/* Header */}
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-secondary dark:text-white mb-2">{texts.selectService[language]}</h2>
         <p className="text-gray-600 dark:text-gray-400">{texts.selectServiceDesc[language]}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {services.map((service) => {
-          const isSelected = selectedService?.id === service.id;
+      {/* Grouped Services */}
+      <div className="space-y-8">
+        {CATEGORY_ORDER.map((category) => {
+          const categoryServices = groupedServices[category];
+          if (categoryServices.length === 0) return null;
+
+          const labelKey = CATEGORY_LABELS[category];
+          const categoryLabel = texts[labelKey]?.[language] || category;
 
           return (
-            <button
-              key={service.id}
-              onClick={() => onSelect(service)}
-              className={`
-                group relative p-6 rounded-xl border-2 transition-all duration-300 text-left flex flex-col h-full w-full outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
-                ${isSelected
-                  ? 'border-primary bg-teal-50/50 dark:bg-teal-900/20 shadow-md'
-                  : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-gray-300 dark:hover:border-slate-600 hover:shadow-lg hover:-translate-y-0.5'
-                }
-              `}
-              aria-pressed={isSelected}
-            >
-              <span className="text-3xl font-bold text-primary dark:text-teal-400 mb-3 block">
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{texts.startingFrom[language]} </span>€{service.price}
-              </span>
-
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                {service.name[language]}
+            <div key={category}>
+              {/* Category Header - Premium uppercase styling */}
+              <h3 className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] mb-4 px-1 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-primary/60"></span>
+                {categoryLabel}
               </h3>
 
-              <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6 flex-grow">
-                {service.description[language]}
-              </p>
+              {/* Service Cards - Premium horizontal layout */}
+              <div className="space-y-3">
+                {categoryServices.map((service) => {
+                  const isSelected = selectedService?.id === service.id;
 
-              <div className="pt-4 border-t border-gray-100 dark:border-slate-700 w-full mt-auto">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    {service.durationMinutes} min
-                  </span>
-                  <span className="text-sm font-semibold text-primary dark:text-teal-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                    {texts.selectBtn[language]} →
-                  </span>
-                </div>
+                  return (
+                    <button
+                      key={service.id}
+                      onClick={() => onSelect(service)}
+                      className={`
+                        group w-full p-4 rounded-xl border-2 transition-all duration-200 text-left
+                        outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+                        ${isSelected
+                          ? 'border-primary bg-teal-50 dark:bg-teal-900/20 shadow-md'
+                          : 'border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5'
+                        }
+                      `}
+                      aria-pressed={isSelected}
+                    >
+                      <div className="flex items-center gap-4">
+                        {/* Icon - Larger with subtle background */}
+                        {service.icon && (
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 transition-colors ${isSelected
+                              ? 'bg-primary/10 dark:bg-teal-800/30'
+                              : 'bg-gray-50 dark:bg-slate-700/50 group-hover:bg-primary/5'
+                            }`}>
+                            {service.icon}
+                          </div>
+                        )}
+
+                        {/* Content - Main info */}
+                        <div className="flex-1 min-w-0">
+                          {/* Title */}
+                          <h4 className={`font-semibold text-base mb-0.5 ${isSelected ? 'text-primary dark:text-teal-400' : 'text-gray-900 dark:text-white'}`}>
+                            {service.name[language]}
+                          </h4>
+
+                          {/* Description - Truncated on small screens */}
+                          <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
+                            {service.description[language]}
+                          </p>
+                        </div>
+
+                        {/* Right side - Duration, Price, Arrow */}
+                        <div className="flex items-center gap-4 shrink-0">
+                          {/* Duration */}
+                          <span className="text-sm text-gray-400 dark:text-gray-500 hidden sm:block">
+                            {service.durationMinutes} min
+                          </span>
+
+                          {/* Price - Prominent */}
+                          <div className="flex items-center gap-1">
+                            <span className={`text-lg font-bold ${isSelected ? 'text-primary dark:text-teal-400' : 'text-gray-800 dark:text-white'}`}>
+                              €{service.price}
+                            </span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
+                              {texts.startingFrom[language]}
+                            </span>
+                            {/* Info tooltip trigger */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowPriceTooltip(showPriceTooltip === service.id ? null : service.id);
+                              }}
+                              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-0.5 ml-0.5"
+                              aria-label="Price information"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </button>
+                          </div>
+
+                          {/* Arrow - CTA indicator */}
+                          <svg
+                            className={`w-5 h-5 shrink-0 transition-all ${isSelected ? 'text-primary dark:text-teal-400' : 'text-gray-300 dark:text-gray-600 group-hover:text-primary group-hover:translate-x-1'}`}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Mobile: Duration shown below */}
+                      <div className="flex items-center gap-2 mt-2 sm:hidden">
+                        <span className="text-xs text-gray-400 dark:text-gray-500">
+                          ⏱ {service.durationMinutes} min
+                        </span>
+                      </div>
+
+                      {/* Tooltip */}
+                      {showPriceTooltip === service.id && (
+                        <div className="mt-3 p-3 bg-gray-50 dark:bg-slate-700 rounded-lg text-xs text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-slate-600">
+                          {texts.priceTooltip?.[language] || 'Final price depends on treatment complexity and materials used.'}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
-            </button>
+            </div>
           );
         })}
       </div>

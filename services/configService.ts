@@ -1,5 +1,5 @@
 import { supabase } from '../supabaseClient';
-import { Language, Service, Specialist, Translations } from '../types';
+import { Language, Service, Specialist, Translations, ServiceCategory } from '../types';
 import { SERVICES as FALLBACK_SERVICES, SPECIALISTS as FALLBACK_SPECIALISTS, TEXTS as FALLBACK_TEXTS } from '../constants';
 
 // ===========================================
@@ -20,6 +20,7 @@ interface ClinicServiceRow {
   duration_minutes: number;
   icon: string | null;
   display_order: number;
+  category: ServiceCategory | null;
 }
 
 interface ClinicSpecialistRow {
@@ -31,6 +32,38 @@ interface ClinicSpecialistRow {
   photo_url: string | null;
   specialty_ids: string[] | null;
   display_order: number;
+}
+
+// Infer category from service name if not set in DB
+function inferCategoryFromName(nameEn: string): ServiceCategory {
+  const name = nameEn.toLowerCase();
+
+  // PREVENTIVE CARE
+  if (name.includes('check-up') || name.includes('hygiene') ||
+    name.includes('integrated') || name.includes('oral cavity')) {
+    return 'preventive';
+  }
+
+  // CHILDREN
+  if (name.includes('children') || name.includes('pediatric') || name.includes('kid')) {
+    return 'children';
+  }
+
+  // SURGERY & IMPLANTS
+  if (name.includes('surgery') || name.includes('surgical') ||
+    name.includes('implant') || name.includes('extraction') ||
+    name.includes('jaw bone') || name.includes('bone tissue')) {
+    return 'surgery';
+  }
+
+  // PROSTHETICS
+  if (name.includes('prosthetic') || name.includes('crown') ||
+    name.includes('bridge') || name.includes('denture') || name.includes('veneer')) {
+    return 'prosthetics';
+  }
+
+  // Default to TREATMENT
+  return 'treatment';
 }
 
 // Transform database row to frontend Service type
@@ -50,6 +83,7 @@ function mapServiceRowToService(row: ClinicServiceRow): Service {
     price: row.price_cents / 100, // Convert cents to euros
     durationMinutes: row.duration_minutes,
     icon: row.icon || '',
+    category: row.category || inferCategoryFromName(row.name_en), // Infer if not set
   };
 }
 
