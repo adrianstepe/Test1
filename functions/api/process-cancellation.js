@@ -24,7 +24,7 @@ export async function onRequestPost(context) {
         }
 
         // Supabase configuration
-        const SUPABASE_URL = env.SUPABASE_URL || 'https://gxxmfrtxhzrzvzdgwmrj.supabase.co';
+        const SUPABASE_URL = env.SUPABASE_URL || 'https://mugcvpwixdysmhgshobi.supabase.co';
         const SUPABASE_SERVICE_KEY = env.SUPABASE_SERVICE_KEY;
 
         if (!SUPABASE_SERVICE_KEY) {
